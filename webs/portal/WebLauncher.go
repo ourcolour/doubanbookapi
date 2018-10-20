@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"iamcc.cn/doubanbookapi/webs/portal/controllers"
+	"iamcc.cn/doubanbookapi/webs/services/impl"
 	"log"
 	"strings"
 )
@@ -45,6 +46,12 @@ func NewWebLauncherWithHostAndPort(host string, port int) (*WebLauncher, error) 
 		return result, err
 	}
 
+	// 启动前检查
+	err = impl.NewDefaultService().VerifyMongoDB()
+	if nil != err {
+		return nil, err
+	}
+
 	// 初始化
 	result = &WebLauncher{
 		Host: host,
@@ -83,21 +90,15 @@ func (this *WebLauncher) Run() {
 	})
 	doubanGroup := this.Router.Group("/douban")
 	{
-		doubanGroup.GET("/isbn/:isbn", func(c *gin.Context) {
-			controllers.BookApiController_QueryByIsbn(c)
-		})
-		doubanGroup.GET("/id/:id", func(c *gin.Context) {
-			controllers.BookApiController_QueryById(c)
+		doubanGroup.GET("/:action/*params", func(c *gin.Context) {
+			controllers.BookApiController_Query(c)
 		})
 	}
 	// ---
 	bookGroup := this.Router.Group("/book")
 	{
-		bookGroup.GET("/id/:id", func(c *gin.Context) {
-			controllers.BookController_QueryById(c)
-		})
-		bookGroup.GET("/:isbn", func(c *gin.Context) {
-			controllers.BookController_QueryByIsbn(c)
+		bookGroup.GET("/*action", func(c *gin.Context) {
+			controllers.BookController_Query(c)
 		})
 		bookGroup.POST("/", func(c *gin.Context) {
 			log.Println("POST")

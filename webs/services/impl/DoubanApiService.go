@@ -1,7 +1,7 @@
 package impl
 
 import (
-	"github.com/gin-gonic/gin"
+	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"iamcc.cn/doubanbookapi/webs/services"
 	doubanapiBL "iamcc.cn/doubanbookapi/webs/services/bll/doubanapi"
@@ -15,9 +15,11 @@ func NewDoubanApiService() services.IDoubanApiService {
 	return result
 }
 
-func (this *DoubanApiService) GetBookByIsbn(c *gin.Context) (*entities.BookInfo, error) {
+func (this *DoubanApiService) GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 	// 参数
-	isbn := c.Param("isbn")
+	if "" == isbn {
+		return nil, errs.ERR_INVALID_PARAMETERS
+	}
 
 	// 调用
 	data, err := doubanapiBL.GetBookByIsbn(isbn)

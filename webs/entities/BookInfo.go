@@ -2,6 +2,7 @@ package entities
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -69,4 +70,23 @@ func (this *BookInfo) ToString() (string, error) {
 	result = string(data)
 
 	return result, err
+}
+
+func ToBookInfo(val interface{}) *BookInfo {
+	var (
+		result BookInfo
+		err    error
+	)
+
+	valueBytes, err := json.Marshal(val)
+	if nil != err {
+		log.Printf("%s\n", err.Error())
+	} else {
+		err = json.Unmarshal(valueBytes, &result)
+		if nil != err {
+			log.Printf("%s\n", err.Error())
+		}
+	}
+
+	return &result
 }

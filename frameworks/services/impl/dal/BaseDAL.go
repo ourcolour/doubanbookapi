@@ -342,3 +342,87 @@ func Count(colName string) (int, error) {
 
 	return result, err
 }
+
+func ExistsDabatase(dbName string) (bool, error) {
+	var (
+		result bool = false
+		err    error
+	)
+
+	if "" == dbName {
+		err = errs.ERR_INVALID_PARAMETERS
+		return result, err
+	}
+
+	session, err := connect()
+	if nil != err {
+		log.Printf("%s\n", err.Error())
+		return result, err
+	}
+	defer session.Close()
+
+	dbArray, err := session.DatabaseNames()
+	if nil != err {
+		return result, err
+	}
+
+	for _, curDbName := range dbArray {
+		if 0 == strings.Compare(curDbName, dbName) {
+			result = true
+			break
+		}
+	}
+
+	return result, err
+}
+
+func ExistsCollection(colName string) (bool, error) {
+	var (
+		result bool = false
+		err    error
+	)
+
+	if "" == colName {
+		err = errs.ERR_INVALID_PARAMETERS
+		return result, err
+	}
+
+	session, err := connect()
+	if nil != err {
+		log.Printf("%s\n", err.Error())
+		return result, err
+	}
+	defer session.Close()
+	db := session.DB(configs.MGO_DATABASE)
+
+	collectionArray, err := db.CollectionNames()
+	if nil != err {
+		return result, err
+	}
+
+	for _, curColName := range collectionArray {
+		if 0 == strings.Compare(curColName, colName) {
+			result = true
+			break
+		}
+	}
+
+	return result, err
+}
+
+func Ping() error {
+	var (
+		err error
+	)
+
+	session, err := connect()
+	if nil != err {
+		log.Printf("%s\n", err.Error())
+		return err
+	}
+	defer session.Close()
+
+	err = session.Ping()
+
+	return err
+}

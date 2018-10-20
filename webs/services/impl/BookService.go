@@ -1,7 +1,7 @@
 package impl
 
 import (
-	"github.com/gin-gonic/gin"
+	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"iamcc.cn/doubanbookapi/webs/services"
 	bookBL "iamcc.cn/doubanbookapi/webs/services/bll/book"
@@ -15,9 +15,11 @@ func NewBookService() services.IBookService {
 	return result
 }
 
-func (this *BookService) Get(c *gin.Context) (*entities.BookInfo, error) {
+func (this *BookService) Get(id string) (*entities.BookInfo, error) {
 	// 参数
-	id := c.Param("id")
+	if "" == id {
+		return nil, errs.ERR_INVALID_PARAMETERS
+	}
 
 	// 调用
 	data, err := bookBL.Get(id)
@@ -25,20 +27,34 @@ func (this *BookService) Get(c *gin.Context) (*entities.BookInfo, error) {
 	return data, err
 }
 
-func (this *BookService) GetByIsbn(c *gin.Context) (*entities.BookInfo, error) {
+func (this *BookService) GetByIsbn(isbn string) (*entities.BookInfo, error) {
 	// 参数
-	isbn := c.Param("isbn")
+	if "" == isbn {
+		return nil, errs.ERR_INVALID_PARAMETERS
+	}
 
 	// 调用
 	data, err := bookBL.GetByIsbn(isbn)
 
 	// 如果本地没有结果，去豆瓣查
 	if nil == err && nil == data {
-		data, err = NewDoubanApiService().GetBookByIsbn(c)
+		data, err = NewDoubanApiService().GetBookByIsbn(isbn)
 
 		// 保存
 		err = bookBL.Add(data)
 	}
+
+	return data, err
+}
+
+func (this *BookService) GetByAuthor(author string) (*entities.BookInfo, error) {
+	// 参数
+	if "" == author {
+		return nil, errs.ERR_INVALID_PARAMETERS
+	}
+
+	// 调用
+	data, err := bookBL.GetAuthor(author)
 
 	return data, err
 }

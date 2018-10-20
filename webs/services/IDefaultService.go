@@ -6,4 +6,5 @@ import (
 
 type IDefaultService interface {
 	Version(c *gin.Context) string
+	VerifyMongoDB() error
 }
