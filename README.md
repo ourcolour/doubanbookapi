@@ -6,11 +6,20 @@ and save it to local MongoDB.
 
 ## Content
 * Requirements
+* Installzation
 * Settings
 
 ## Requirements
 1. MongoDB
 2. Internet
+
+## Installation
+1. Make sure you have MongoDB installed and own the administrator role.
+2. Create one database which named by "smartlibrarian".
+3. Restore the Mongo(Structure & Data) by the json format script below.
+```
+$PRJ_ROOT/install/smartlibrarian.sl_book_new.json
+```
 
 ## Settings
 
