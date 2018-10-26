@@ -9,6 +9,7 @@ var (
 	ERR_OK              = errors.New("执行成功")
 
 	ERR_NOT_FOUND                = errors.New("内容未找到")
+	ERR_DUPLICATED               = errors.New("内容已经存在")
 	ERR_INVALID_PARAMETERS       = errors.New("无效的参数")
 	ERR_INVALID_VALUES           = errors.New("数据库操作失败")
 	ERR_DATABASE_OPERATION       = errors.New("数据库操作失败")

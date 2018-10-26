@@ -3,6 +3,7 @@ package entities
 import (
 	"encoding/json"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -56,33 +57,21 @@ type BookInfo struct {
 	UpdateTime time.Time `json:"update_time" bson:"update_time"`
 }
 
-func (this *BookInfo) ToString() (string, error) {
-	var (
-		result string
-		err    error
-	)
-
-	data, err := json.Marshal(this)
-	if nil != err {
-		return result, err
-	}
-
-	result = string(data)
-
-	return result, err
-}
-
-func ToBookInfo(val interface{}) *BookInfo {
+func NewBookInfoByJson(jsonStr string) *BookInfo {
 	var (
 		result BookInfo
 		err    error
 	)
 
-	valueBytes, err := json.Marshal(val)
+	if 0 == strings.Compare("", strings.TrimSpace(jsonStr)) {
+		return nil
+	}
+
 	if nil != err {
 		log.Printf("%s\n", err.Error())
 	} else {
-		err = json.Unmarshal(valueBytes, &result)
+		bytes := []byte(jsonStr)
+		err = json.Unmarshal(bytes, &result)
 		if nil != err {
 			log.Printf("%s\n", err.Error())
 		}

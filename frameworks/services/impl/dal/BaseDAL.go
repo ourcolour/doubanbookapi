@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/configs"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
+	"iamcc.cn/doubanbookapi/utils"
 	"log"
 	"reflect"
 	"strings"
@@ -105,34 +106,36 @@ func FindOne(colName string, selector bson.M) (interface{}, error) {
 	return result, err
 }
 
-func FindAll(colName string, selector bson.M) (interface{}, error) {
+func FindAll(colName string, selector bson.M, typ reflect.Type) ([]interface{}, error) {
 	var (
-		result interface{}
+		result []interface{} = make([]interface{}, 0)
 		err    error
 	)
 
 	session, err := connect()
 	if nil != err {
 		log.Printf("%s\n", err.Error())
-		return nil, err
+		return result, err
 	}
 	defer session.Close()
 	col := session.DB(configs.MGO_DATABASE).C(colName)
 
+	log.Println(utils.ToJsonString(selector))
 	query := col.Find(selector)
-	err = query.All(&result)
 
-	// 忽略空记录异常
-	if reflect.TypeOf(errs.ERR_NOT_FOUND).Elem() == reflect.TypeOf(err).Elem() {
-		err = nil
+	itr := query.Iter()
+	pObj := reflect.New(typ).Interface()
+	for itr.Next(pObj) {
+		result = append(result, pObj)
+		pObj = reflect.New(typ).Interface()
 	}
 
 	return result, err
 }
 
-func FindList(colName string, selector bson.M, skip int, limit int) (interface{}, error) {
+func FindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) ([]interface{}, error) {
 	var (
-		result interface{}
+		result []interface{} = make([]interface{}, 0)
 		err    error
 	)
 
@@ -144,8 +147,34 @@ func FindList(colName string, selector bson.M, skip int, limit int) (interface{}
 	defer session.Close()
 	col := session.DB(configs.MGO_DATABASE).C(colName)
 
+	log.Println(utils.ToJsonString(selector))
 	query := col.Find(selector).Skip(skip).Limit(limit)
-	err = query.All(&result)
+
+	itr := query.Iter()
+	pObj := reflect.New(typ).Interface()
+	for itr.Next(pObj) {
+		result = append(result, pObj)
+		pObj = reflect.New(typ).Interface()
+	}
+
+	return result, err
+}
+
+func Count(colName string, selector bson.M) (int, error) {
+	var (
+		result int = 0
+		err    error
+	)
+
+	session, err := connect()
+	if nil != err {
+		log.Printf("%s\n", err.Error())
+		return 0, err
+	}
+	defer session.Close()
+	col := session.DB(configs.MGO_DATABASE).C(colName)
+
+	result, err = col.Find(selector).Count()
 
 	return result, err
 }
@@ -159,21 +188,20 @@ func MustFindOne(colName string, selector bson.M) interface{} {
 	}
 }
 
-func MustFindList(colName string, selector bson.M, skip int, limit int) interface{} {
-	val, err := FindList(colName, selector, skip, limit)
+func MustFindAll(colName string, selector bson.M, typ reflect.Type) []interface{} {
+	result, err := FindAll(colName, selector, typ)
 	if nil != err {
-		return nil
-	} else {
-		return val
+		log.Panicln(err)
 	}
+	return result
 }
-func MustFindAll(colName string, selector bson.M) interface{} {
-	val, err := FindAll(colName, selector)
+
+func MustFindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) []interface{} {
+	result, err := FindList(colName, selector, typ, skip, limit)
 	if nil != err {
-		return nil
-	} else {
-		return val
+		log.Panicln(err)
 	}
+	return result
 }
 
 // ---
@@ -322,25 +350,6 @@ func RemoveId(colName string, id interface{}) error {
 	err = col.RemoveId(id)
 
 	return err
-}
-
-func Count(colName string) (int, error) {
-	var (
-		result int
-		err    error
-	)
-
-	session, err := connect()
-	if nil != err {
-		log.Printf("%s\n", err.Error())
-		return result, err
-	}
-	defer session.Close()
-	col := session.DB(configs.MGO_DATABASE).C(colName)
-
-	result, err = col.Count()
-
-	return result, err
 }
 
 func ExistsDabatase(dbName string) (bool, error) {

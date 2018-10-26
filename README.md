@@ -42,3 +42,42 @@ You can change MongoDB service here:
 ```$go
 $RPJ_ROOT/configs/MongoDBConfig.go
 ```
+
+## How to use
+
+### Query API
+
+You can query book by *Isbn, Author* and even by douban book *Identifier*(id).
+
+- by isbn
+
+    Method 1:
+        
+        http://localhost:8080/book/isbn/*{isbn}*
+        
+    Or use the alias method, it's shortter.
+        
+        http://localhost:8080/book/*{isbn}*
+    
+- by author
+
+        http://localhost:8080/book/author/*{author}*
+    
+- by douban idntifier
+
+        http://localhost:8080/book/id/*{id}*
+
+
+Examples here:
+
+- by isbn
+    
+        http://localhost:8080/book/9787556820825
+
+- by ahthor
+
+        http://localhost:8080/book/author/斯坦尼斯
+
+- by douban id
+
+        http://localhost:8080/book/id/26952828

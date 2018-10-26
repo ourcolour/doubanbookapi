@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"iamcc.cn/doubanbookapi/webs/portal/controllers"
+	controllers "iamcc.cn/doubanbookapi/webs/portal/controllers/v1"
 	"iamcc.cn/doubanbookapi/webs/services/impl"
 	"log"
 	"strings"
@@ -85,25 +85,43 @@ func (this *WebLauncher) Run() {
 	//this.Router.LoadHTMLGlob(filepath.Join(os.Getenv("GOPATH"), "src/iamcc.cn/smartreader/resources/templates/**/*"))
 
 	// ---
-	this.Router.GET("/version", func(c *gin.Context) {
-		controllers.DefaultController_Version(c)
-	})
-	doubanGroup := this.Router.Group("/douban")
+	v1Group := this.Router.Group("/v1")
 	{
-		doubanGroup.GET("/:action/*params", func(c *gin.Context) {
-			controllers.BookApiController_Query(c)
+		// ---
+		v1Group.GET("/version", func(c *gin.Context) {
+			controllers.DefaultController_Version(c)
 		})
+		// ---
+		buyRecordGroup := v1Group.Group("/buyrecord")
+		{
+			buyRecordGroup.GET("/", func(c *gin.Context) {
+				controllers.BuyRecordController_Query(c)
+			})
+			buyRecordGroup.POST("/", func(c *gin.Context) {
+				controllers.BuyRecordController_Add(c)
+			})
+		}
+		// ---
+		doubanGroup := v1Group.Group("/douban")
+		{
+			doubanGroup.GET("/*action", func(c *gin.Context) {
+				controllers.BookApiController_Query(c)
+			})
+		}
+		// ---
+		bookGroup := v1Group.Group("/book")
+		{
+			bookGroup.GET("/*action", func(c *gin.Context) {
+				controllers.BookController_Query(c)
+			})
+			bookGroup.POST("/", func(c *gin.Context) {
+				log.Println("POST")
+			})
+		}
+		// ---
 	}
 	// ---
-	bookGroup := this.Router.Group("/book")
-	{
-		bookGroup.GET("/*action", func(c *gin.Context) {
-			controllers.BookController_Query(c)
-		})
-		bookGroup.POST("/", func(c *gin.Context) {
-			log.Println("POST")
-		})
-	}
+
 	// ---
 	this.Router.Run(fmt.Sprintf("%s:%d", this.Host, this.Port))
 

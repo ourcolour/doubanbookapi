@@ -1,12 +1,18 @@
 package services
 
 import (
+	"github.com/emirpasic/gods/maps/hashmap"
 	"iamcc.cn/doubanbookapi/webs/entities"
 )
 
 type IBookService interface {
-	//Add(c *gin.Context) (*entities.BookInfo, error)
-	Get(id string) (*entities.BookInfo, error)
-	GetByIsbn(isbn string) (*entities.BookInfo, error)
-	GetByAuthor(author string) (*entities.BookInfo, error)
+	// Book
+	AddBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error)
+	GetBook(id string) (*entities.BookInfo, error)
+	GetBookByIsbn(isbn string) (*entities.BookInfo, error)
+	GetBookByAuthor(author string) (*entities.BookInfo, error)
+
+	// Buy record
+	AddBuyRecord(*entities.BuyRecord) (*entities.BuyRecord, error)
+	GetBuyRecord(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error)
 }

@@ -4,13 +4,15 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/frameworks/services/impl/dal"
+	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"time"
 )
 
-func Add(bookInfo *entities.BookInfo) error {
+func AddBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 	var (
-		err error
+		result *entities.BookInfo
+		err    error
 	)
 
 	if nil == bookInfo {
@@ -28,25 +30,30 @@ func Add(bookInfo *entities.BookInfo) error {
 		// 检查是否已经存在相同记录
 		foundValue, err := dal.FindOne(colName, selector)
 		if nil != err {
-			return err
+			return result, err
 		}
 
 		if nil != foundValue { // 已经存在，更新现有记录
-			oldBookInfo := foundValue.(entities.BookInfo)
-			oldBookInfo.UpdateTime = time.Now()
+			jsonStr, err := utils.ToJsonString(foundValue)
+			if nil != err {
+				return result, err
+			}
+			result = entities.NewBookInfoByJson(jsonStr)
+			result.UpdateTime = time.Now()
 
-			err = dal.Update(colName, selector, oldBookInfo)
+			err = dal.UpdateId(colName, result.Id, result)
 		} else { // 不存在，新增记录
-			bookInfo.CreateTime = time.Now()
+			result = bookInfo
+			result.CreateTime = time.Now()
 
-			err = dal.Insert(colName, bookInfo)
+			err = dal.Insert(colName, result)
 		}
 	}
 
-	return err
+	return result, err
 }
 
-func Get(id string) (*entities.BookInfo, error) {
+func GetBook(id string) (*entities.BookInfo, error) {
 	var (
 		val interface{}
 
@@ -63,15 +70,20 @@ func Get(id string) (*entities.BookInfo, error) {
 		}
 
 		val, err = dal.FindOne(colName, selector)
+
 		if nil == err && nil != val {
-			result = entities.ToBookInfo(val)
+			jsonStr, err := utils.ToJsonString(val)
+			if nil != err {
+				return result, err
+			}
+			result = entities.NewBookInfoByJson(jsonStr)
 		}
 	}
 
 	return result, err
 }
 
-func GetAuthor(author string) (*entities.BookInfo, error) {
+func GetBookAuthor(author string) (*entities.BookInfo, error) {
 	var (
 		val interface{}
 
@@ -92,14 +104,15 @@ func GetAuthor(author string) (*entities.BookInfo, error) {
 
 		val, err = dal.FindOne(colName, selector)
 		if nil == err && nil != val {
-			result = entities.ToBookInfo(val)
+			jsonStr := utils.MustToJsonString(val)
+			result = entities.NewBookInfoByJson(jsonStr)
 		}
 	}
 
 	return result, err
 }
 
-func GetByIsbn(isbn string) (*entities.BookInfo, error) {
+func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 	var (
 		val interface{}
 
@@ -117,7 +130,8 @@ func GetByIsbn(isbn string) (*entities.BookInfo, error) {
 
 		val, err = dal.FindOne(colName, selector)
 		if nil == err && nil != val {
-			result = entities.ToBookInfo(val)
+			jsonStr := utils.MustToJsonString(val)
+			result = entities.NewBookInfoByJson(jsonStr)
 		}
 	}
 

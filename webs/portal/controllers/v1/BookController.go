@@ -1,4 +1,4 @@
-package controllers
+package v1
 
 import (
 	"github.com/gin-gonic/gin"
@@ -23,19 +23,19 @@ func BookController_Query(c *gin.Context) {
 	bookService := NewBookService()
 	if m1Regex.MatchString(action) {
 		isbn := m1Regex.FindStringSubmatch(action)[1]
-		data, err := bookService.GetByIsbn(isbn)
+		data, err := bookService.GetBookByIsbn(isbn)
 		Json(c, data, err)
 	} else if m2Regex.MatchString(action) {
 		isbn := m2Regex.FindStringSubmatch(action)[1]
-		data, err := bookService.GetByIsbn(isbn)
+		data, err := bookService.GetBookByIsbn(isbn)
 		Json(c, data, err)
 	} else if m3Regex.MatchString(action) {
 		id := m3Regex.FindStringSubmatch(action)[1]
-		data, err := bookService.Get(id)
+		data, err := bookService.GetBook(id)
 		Json(c, data, err)
 	} else if m4Regex.MatchString(action) {
 		author := m4Regex.FindStringSubmatch(action)[1]
-		data, err := bookService.GetByAuthor(author)
+		data, err := bookService.GetBookByAuthor(author)
 		Json(c, data, err)
 	} else {
 		Json(c, nil, errs.ERR_INVALID_PARAMETERS)
