@@ -96,6 +96,18 @@ func (this *BookService) GetBookByAuthor(author string) (*entities.BookInfo, err
 	return data, err
 }
 
+func (this *BookService) GetBookByTitle(title string) ([]*entities.BookInfo, error) {
+	// 参数
+	if 0 == strings.Compare("", title) {
+		return nil, errs.ERR_INVALID_PARAMETERS
+	}
+
+	// 调用
+	data, err := bookBL.GetBookTitle(title)
+
+	return data, err
+}
+
 func (this *BookService) GetBuyRecord(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error) {
 	var (
 		result []*entities.BuyRecord

@@ -20,8 +20,10 @@ func BookController_ActionDispatcher(c *gin.Context) {
 	m3Regex := regexp.MustCompile(`^/id/(\d+)$`)
 	// 4. /book/author/:author
 	m4Regex := regexp.MustCompile(`^/author/([^/]+)$`)
-	// 5. /rank
-	m5Regex := regexp.MustCompile(`^/rank/?$`)
+	// 5. /book/author/:author
+	m5Regex := regexp.MustCompile(`^/title/([^/]+)$`)
+	// 6. /rank
+	m6Regex := regexp.MustCompile(`^/rank/?$`)
 
 	if m1Regex.MatchString(action) {
 		isbn := m1Regex.FindStringSubmatch(action)[1]
@@ -36,6 +38,9 @@ func BookController_ActionDispatcher(c *gin.Context) {
 		author := m4Regex.FindStringSubmatch(action)[1]
 		BookController_GetBookByAuthor(c, author)
 	} else if m5Regex.MatchString(action) {
+		title := m5Regex.FindStringSubmatch(action)[1]
+		BookController_GetBookByTitle(c, title)
+	} else if m6Regex.MatchString(action) {
 		BookController_Rank(c)
 	} else {
 		Json(c, nil, errs.ERR_INVALID_PARAMETERS)
@@ -57,6 +62,12 @@ func BookController_GetBookById(c *gin.Context, id string) {
 func BookController_GetBookByAuthor(c *gin.Context, author string) {
 	bookService := NewBookService()
 	data, err := bookService.GetBookByAuthor(author)
+	Json(c, data, err)
+}
+
+func BookController_GetBookByTitle(c *gin.Context, title string) {
+	bookService := NewBookService()
+	data, err := bookService.GetBookByTitle(title)
 	Json(c, data, err)
 }
 

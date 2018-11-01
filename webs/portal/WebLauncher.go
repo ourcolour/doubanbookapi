@@ -123,6 +123,9 @@ func (this *WebLauncher) Run() {
 		// ---
 	}
 	// ---
+	this.Router.Any("/favicon.ico", func(c *gin.Context) {
+		controllers.DefaultController_Favicon(c)
+	})
 	this.Router.Any("/", func(c *gin.Context) {
 		controllers.DefaultController_404Error(c)
 	})

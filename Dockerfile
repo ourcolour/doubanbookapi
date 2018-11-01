@@ -2,8 +2,10 @@ FROM centos:7
 
 MAINTAINER CC.Yao <yaochen@xjh.com>
 
-ADD ./bin/doubanbookapi_linux /
+RUN mkdir -p /opt/doubanbookapi
+ADD ./bin/doubanbookapi_linux /opt/doubanbookapi
+ADD ./resources/favicon.ico /opt/doubanbookapi
 
-CMD ["/doubanbookapi_linux"]
+CMD ["/opt/doubanbookapi/doubanbookapi_linux"]
 
 EXPOSE 8080

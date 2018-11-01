@@ -10,8 +10,8 @@ const (
 )
 
 const (
-	//MGO_ADDRESSES = "192.168.2.91:27018"
-	MGO_ADDRESSES          = "127.0.0.1:27018"
+	MGO_ADDRESSES = "192.168.2.91:27018"
+	//MGO_ADDRESSES          = "127.0.0.1:27018"
 	MGO_REPLICATE_SET_NAME = ""
 
 	MGO_DATABASE = "DoubanBookApi"

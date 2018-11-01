@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	. "iamcc.cn/doubanbookapi/frameworks/controllers"
+	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/services"
 	"iamcc.cn/doubanbookapi/webs/services/impl"
 	"net/http"
+	"path/filepath"
 )
 
 func DefaultController_Version(c *gin.Context) {
@@ -15,6 +17,11 @@ func DefaultController_Version(c *gin.Context) {
 	data := defaultService.Version(c)
 
 	Json(c, data, nil)
+}
+
+func DefaultController_Favicon(c *gin.Context) {
+	iconPath := filepath.Join(utils.GetAppPath(), "favicon.ico")
+	c.File(iconPath)
 }
 
 func DefaultController_50XError(c *gin.Context) {

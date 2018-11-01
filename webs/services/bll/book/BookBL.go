@@ -115,6 +115,36 @@ func GetBookAuthor(author string) (*entities.BookInfo, error) {
 	return result, err
 }
 
+func GetBookTitle(title string) ([]*entities.BookInfo, error) {
+	var (
+		result []*entities.BookInfo
+		err    error
+	)
+
+	if "" == title {
+		err = errs.ERR_INVALID_PARAMETERS
+	} else {
+		colName := "sl_book_new"
+		selector := bson.M{"$or": []bson.M{
+			bson.M{"title": bson.RegEx{Pattern: title, Options: "i"}},
+			bson.M{"subtitle": bson.RegEx{Pattern: title, Options: "i"}},
+		}}
+
+		typ := reflect.TypeOf(entities.BookInfo{})
+		dataList, err := dal.FindAll(colName, selector, typ)
+		if nil == err {
+			for _, cur := range dataList {
+				val := cur.(*entities.BookInfo)
+				if nil != val {
+					result = append(result, val)
+				}
+			}
+		}
+	}
+
+	return result, err
+}
+
 func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
 	var (
 		result []*entities.BookInfo
@@ -135,6 +165,7 @@ func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
 		// 查询
 		colName := "sl_book_new"
 		selector := bson.M{"$or": isbnSelectorArray}
+
 		typ := reflect.TypeOf(entities.BookInfo{})
 		dataList, err := dal.FindAll(colName, selector, typ)
 		if nil == err {

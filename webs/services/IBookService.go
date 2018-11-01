@@ -12,6 +12,7 @@ type IBookService interface {
 	GetBook(id string) (*entities.BookInfo, error)
 	GetBookByIsbn(isbn string) (*entities.BookInfo, error)
 	GetBookByAuthor(author string) (*entities.BookInfo, error)
+	GetBookByTitle(title string) ([]*entities.BookInfo, error)
 
 	// Buy record
 	AddBuyRecord(*entities.BuyRecord) (*entities.BuyRecord, error)

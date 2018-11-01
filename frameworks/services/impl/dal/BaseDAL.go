@@ -120,7 +120,7 @@ func FindAll(colName string, selector bson.M, typ reflect.Type) ([]interface{}, 
 	defer session.Close()
 	col := session.DB(configs.MGO_DATABASE).C(colName)
 
-	log.Println(utils.ToJsonString(selector))
+	//log.Println(utils.ToJsonString(selector))
 	query := col.Find(selector)
 
 	itr := query.Iter()
