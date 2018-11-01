@@ -85,10 +85,12 @@ func (this *WebLauncher) Run() {
 	//this.Router.LoadHTMLGlob(filepath.Join(os.Getenv("GOPATH"), "src/iamcc.cn/smartreader/resources/templates/**/*"))
 
 	// ---
+	//this.Router.GET("/v1", func(c *gin.Context) {
+	//})
 	v1Group := this.Router.Group("/v1")
 	{
 		// ---
-		v1Group.GET("/version", func(c *gin.Context) {
+		v1Group.Any("/", func(c *gin.Context) {
 			controllers.DefaultController_Version(c)
 		})
 		// ---
@@ -112,7 +114,7 @@ func (this *WebLauncher) Run() {
 		bookGroup := v1Group.Group("/book")
 		{
 			bookGroup.GET("/*action", func(c *gin.Context) {
-				controllers.BookController_Query(c)
+				controllers.BookController_ActionDispatcher(c)
 			})
 			bookGroup.POST("/", func(c *gin.Context) {
 				log.Println("POST")
@@ -121,7 +123,20 @@ func (this *WebLauncher) Run() {
 		// ---
 	}
 	// ---
-
+	this.Router.Any("/", func(c *gin.Context) {
+		controllers.DefaultController_404Error(c)
+	})
+	// 50X Pages
+	this.Router.Any("/50X", func(c *gin.Context) {
+		controllers.DefaultController_50XError(c)
+	})
+	// 404 Page
+	this.Router.Any("/404", func(c *gin.Context) {
+		controllers.DefaultController_404Error(c)
+	})
+	this.Router.NoRoute(func(c *gin.Context) {
+		controllers.DefaultController_404Error(c)
+	})
 	// ---
 	this.Router.Run(fmt.Sprintf("%s:%d", this.Host, this.Port))
 

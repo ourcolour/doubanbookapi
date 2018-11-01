@@ -26,7 +26,7 @@ func (this *DoubanApiService) GetBookByIsbn(isbn string) (*entities.BookInfo, er
 
 	// 保存到本地
 	if nil == err && nil != data {
-		data, err = NewBookService().AddBook(data)
+		data, err = NewBookService().AddOrUpdateBook(data)
 	}
 
 	return data, err

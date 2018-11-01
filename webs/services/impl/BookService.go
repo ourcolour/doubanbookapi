@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"github.com/emirpasic/gods/lists/arraylist"
 	"github.com/emirpasic/gods/maps/hashmap"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/utils"
@@ -20,7 +21,25 @@ func NewBookService() services.IBookService {
 	return result
 }
 
-func (this *BookService) AddBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
+func (this *BookService) GetRankInIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
+	var (
+		result []*entities.BookInfo = []*entities.BookInfo{}
+		err    error
+	)
+
+	// 参数
+	if nil == isbnList || isbnList.Empty() {
+		return result, err
+	}
+
+	bookList, err := bookBL.GetBookListByIsbn(isbnList)
+	// 排序
+	result = bookBL.Sort(bookList)
+
+	return result, err
+}
+
+func (this *BookService) AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 	var (
 		result *entities.BookInfo
 		err    error
@@ -32,7 +51,7 @@ func (this *BookService) AddBook(bookInfo *entities.BookInfo) (*entities.BookInf
 	}
 
 	// 调用
-	result, err = bookBL.AddBook(bookInfo)
+	result, err = bookBL.AddOrUpdateBook(bookInfo)
 
 	return result, err
 }

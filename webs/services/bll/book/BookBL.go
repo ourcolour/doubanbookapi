@@ -1,15 +1,18 @@
 package book
 
 import (
+	"github.com/emirpasic/gods/lists/arraylist"
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/frameworks/services/impl/dal"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
+	"reflect"
+	"sort"
 	"time"
 )
 
-func AddBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
+func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 	var (
 		result *entities.BookInfo
 		err    error
@@ -110,6 +113,78 @@ func GetBookAuthor(author string) (*entities.BookInfo, error) {
 	}
 
 	return result, err
+}
+
+func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
+	var (
+		result []*entities.BookInfo
+		err    error
+	)
+
+	if nil == isbnList || isbnList.Empty() {
+		err = errs.ERR_INVALID_PARAMETERS
+	} else {
+		isbnSelectorArray := []bson.M{}
+		itr := isbnList.Iterator()
+		for itr.Next() {
+			isbn := itr.Value().(string)
+			curSelector := bson.M{"isbn13": isbn}
+			isbnSelectorArray = append(isbnSelectorArray, curSelector)
+		}
+
+		// 查询
+		colName := "sl_book_new"
+		selector := bson.M{"$or": isbnSelectorArray}
+		typ := reflect.TypeOf(entities.BookInfo{})
+		dataList, err := dal.FindAll(colName, selector, typ)
+		if nil == err {
+			for _, cur := range dataList {
+				val := cur.(*entities.BookInfo)
+				if nil != val {
+					result = append(result, val)
+				}
+			}
+		}
+	}
+
+	return result, err
+}
+
+func Sort(bookArray []*entities.BookInfo) []*entities.BookInfo {
+	// 排序
+	score := func(b1, b2 *entities.BookInfo) bool {
+		score1 := float64(b1.Rating.NumRaters) * b1.Rating.Average
+		score2 := float64(b2.Rating.NumRaters) * b2.Rating.Average
+		return score1 > score2
+	}
+	SortBy(score).Sort(bookArray)
+
+	return bookArray
+}
+
+type SortBy func(b1 *entities.BookInfo, b2 *entities.BookInfo) bool
+
+func (by SortBy) Sort(books []*entities.BookInfo) {
+	bookSlice := &BookScoreSorter{
+		Books: books,
+		By:    by,
+	}
+	sort.Sort(bookSlice)
+}
+
+type BookScoreSorter struct {
+	Books []*entities.BookInfo
+	By    func(b1 *entities.BookInfo, b2 *entities.BookInfo) bool
+}
+
+func (this *BookScoreSorter) Len() int {
+	return len(this.Books)
+}
+func (this *BookScoreSorter) Swap(b1, b2 int) {
+	this.Books[b1], this.Books[b2] = this.Books[b2], this.Books[b1]
+}
+func (this *BookScoreSorter) Less(b1, b2 int) bool {
+	return this.By(this.Books[b1], this.Books[b2])
 }
 
 func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {

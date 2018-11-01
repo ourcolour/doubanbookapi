@@ -14,4 +14,6 @@ var (
 	ERR_INVALID_VALUES           = errors.New("数据库操作失败")
 	ERR_DATABASE_OPERATION       = errors.New("数据库操作失败")
 	ERR_DATABASE_NOT_INITIALIZED = errors.New("数据库未初始化")
+	ERR_SERVICE_UNAVAILABLE      = errors.New("服务不可用")
+	ERR_UNAUTHORIZED             = errors.New("访问未授权")
 )
