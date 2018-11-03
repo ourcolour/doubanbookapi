@@ -4,22 +4,32 @@ Just as the name, the API implemention for "Douban Book".
 You can query book information via api which provided by Douban.com 
 and save it to local MongoDB.
 
+Now a days, we finished the feature search engine supported via ElasticSearch.
+
+## Version
+    0.0.3
+
 ## Content
 * Requirements
 * Installzation
 * Settings
 
 ## Requirements
-1. MongoDB
-2. Internet
+1. Internet connection
+2. MongoDB v4.0.1 (Single-node or Cluster)
+3. _[Optional]_ ElasticSearch v6.4.2 (with IK plugin)
 
 ## Installation
 1. Make sure you have MongoDB installed and own the administrator role.
 2. Create one database which named by "smartlibrarian".
 3. Restore the Mongo(Structure & Data) by the json format script below.
-```
-$PRJ_ROOT/install/smartlibrarian.sl_book_new.json
-```
+    ```
+    $PRJ_ROOT/install/mongodb/smartlibrarian.sl_book_new.json
+    ```
+4. Restore the ElasticSearch Index & Type mapping.
+    ```
+    $PRJ_ROOT/install/elasticsearch/sl_book_new.book.txt
+    ```
 
 ## Settings
 
@@ -43,9 +53,19 @@ You can change MongoDB service here:
 $RPJ_ROOT/configs/MongoDBConfig.go
 ```
 
+### ES Settings
+ 
+You can change ElasticSearch service here:
+
+```$go
+$RPJ_ROOT/configs/EsConfig.go
+```
+
 ## How to use
 
-### Query API
+### Query API 
+
+##### Query Mongo directly and no search engine accelerate.
 
 You can query book by *Isbn, Author* and even by douban book *Identifier*(id).
 
@@ -53,31 +73,50 @@ You can query book by *Isbn, Author* and even by douban book *Identifier*(id).
 
     Method 1:
         
-        http://localhost:8080/book/isbn/*{isbn}*
+        http://localhost:8080/v1/book/isbn/*{isbn}*
         
     Or use the alias method, it's shortter.
         
-        http://localhost:8080/book/*{isbn}*
+        http://localhost:8080/v1/book/*{isbn}*
     
 - by author
 
-        http://localhost:8080/book/author/*{author}*
+        http://localhost:8080/v1/book/author/*{author}*
     
 - by douban idntifier
 
-        http://localhost:8080/book/id/*{id}*
+        http://localhost:8080/v1/book/id/*{id}*
 
 
 Examples here:
 
 - by isbn
     
-        http://localhost:8080/book/9787556820825
+        http://localhost:8080/v1/book/9787556820825
 
 - by ahthor
 
-        http://localhost:8080/book/author/斯坦尼斯
+        http://localhost:8080/v1/book/author/斯坦尼斯
 
 - by douban id
 
-        http://localhost:8080/book/id/26952828
+        http://localhost:8080/v1/book/id/26952828
+
+### Search API
+
+##### Data accelerated by ElasticSearch.
+
+- by `KEYWORD`
+
+    Basic query:
+    
+        http://localhost:8080/v1/search/?k={KEYWORD}
+        
+    Paged query result:
+        
+        http://localhost:8080/v1/search/?k={KEYWORD}&pageNo=2&pageSize=10
+        
+    The records in result set would be splited into 10 per page.
+    
+    Current page is the #*2nd* page.
+        

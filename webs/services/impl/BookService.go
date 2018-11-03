@@ -4,6 +4,7 @@ import (
 	"github.com/emirpasic/gods/lists/arraylist"
 	"github.com/emirpasic/gods/maps/hashmap"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
+	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"iamcc.cn/doubanbookapi/webs/services"
@@ -17,8 +18,26 @@ type BookService struct {
 }
 
 func NewBookService() services.IBookService {
-	var result services.IBookService = &BookService{}
-	return result
+	return services.IBookService(&BookService{})
+}
+
+func (this *BookService) PagedGetBookBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
+	var (
+		result *datasources.PagedDataSource
+		err    error
+	)
+
+	// 参数
+	result, err = buyrecordBL.GetBuyRecordListBy(criteriaMap, pageSize, pageNo)
+
+	return result, err
+}
+
+func (this *BookService) GetBookBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error) {
+	// 参数
+	pds, err := bookBL.GetBookListBy(criteriaMap, 0, 0)
+
+	return datasources.FromPagedDataSource(pds), err
 }
 
 func (this *BookService) GetRankInIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
@@ -108,14 +127,19 @@ func (this *BookService) GetBookByTitle(title string) ([]*entities.BookInfo, err
 	return data, err
 }
 
-func (this *BookService) GetBuyRecord(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error) {
+func (this *BookService) GetBuyRecordBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error) {
+	pds, err := this.PagedGetBuyRecordBy(criteriaMap, 0, 0)
+	return datasources.FromPagedDataSource(pds), err
+}
+
+func (this *BookService) PagedGetBuyRecordBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
 	var (
-		result []*entities.BuyRecord
+		result *datasources.PagedDataSource
 		err    error
 	)
 
 	// 参数
-	result, err = buyrecordBL.GetList(criteriaMap)
+	result, err = buyrecordBL.GetBuyRecordListBy(criteriaMap, pageSize, pageNo)
 
 	return result, err
 }
@@ -135,7 +159,7 @@ func (this *BookService) AddBuyRecord(buyRecord *entities.BuyRecord) (*entities.
 	buyRecord.UpdateTime = utils.ZeroTime()
 
 	// 添加
-	err := buyrecordBL.Add(buyRecord)
+	err := buyrecordBL.AddBuyRecord(buyRecord)
 
 	return buyRecord, err
 }

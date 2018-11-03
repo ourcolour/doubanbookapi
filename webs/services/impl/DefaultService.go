@@ -11,8 +11,7 @@ type DefaultService struct {
 }
 
 func NewDefaultService() services.IDefaultService {
-	var result services.IDefaultService = &DefaultService{}
-	return result
+	return services.IDefaultService(&DefaultService{})
 }
 
 func (this *DefaultService) Version(c *gin.Context) string {

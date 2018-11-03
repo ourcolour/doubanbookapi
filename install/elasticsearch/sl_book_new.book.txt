@@ -1,0 +1,178 @@
+PUT sl_book_new
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "book": {
+      "properties": {
+        "alt": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "alt_title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "author": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "author_intro": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "binding": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "catalog": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "create_time": {
+          "type": "date"
+        },
+        "id": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "image": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "images": {
+          "properties": {
+            "large": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            },
+            "medium": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            },
+            "small": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            }
+          }
+        },
+        "isbn10": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "isbn13": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "origin_title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "pages": {
+          "type": "long"
+        },
+        "price": {
+          "type": "long"
+        },
+        "pubdate": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "publisher": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "rating": {
+          "properties": {
+            "average": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "min": {
+              "type": "long"
+            },
+            "numRaters": {
+              "type": "long"
+            }
+          }
+        },
+        "subtitle": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "summary": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "tags": {
+          "properties": {
+            "count": {
+              "type": "long"
+            },
+            "name": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            },
+            "title": {
+              "type": "text",
+              "analyzer": "ik_max_word",
+              "search_analyzer": "ik_max_word"
+            }
+          }
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "translator": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "update_time": {
+          "type": "date"
+        },
+        "url": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        }
+      }
+    }
+  }
+}

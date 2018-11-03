@@ -62,13 +62,11 @@ func BuyRecordController_Query(c *gin.Context) {
 		} else {
 			// 分页
 			pageNo, pageSize := datasources.ParsePageArgs(c)
-			criteriaMap.Put("pageNo", pageNo)
-			criteriaMap.Put("pageSize", pageSize)
 
 			// 调用
-			resultInfo, err := NewBookService().GetBuyRecord(criteriaMap)
+			bookService := NewBookService()
+			resultInfo, err := bookService.PagedGetBuyRecordBy(criteriaMap, pageSize, pageNo)
 			Json(c, resultInfo, err)
 		}
 	}
-
 }

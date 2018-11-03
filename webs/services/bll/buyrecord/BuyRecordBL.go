@@ -4,16 +4,22 @@ import (
 	"github.com/emirpasic/gods/maps/hashmap"
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
-	"iamcc.cn/doubanbookapi/frameworks/services/impl/dal"
+	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
+	mongoDAL "iamcc.cn/doubanbookapi/frameworks/services/impl/dal/mongodb"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"reflect"
 	"time"
 )
 
-func GetList(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error) {
+func GetList(criteriaMap *hashmap.Map) (*datasources.DataSource, error) {
+	pds, err := GetBuyRecordListBy(criteriaMap, 0, 0)
+	return datasources.FromPagedDataSource(pds), err
+}
+
+func GetBuyRecordListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
 	var (
-		result []*entities.BuyRecord = make([]*entities.BuyRecord, 0)
+		result *datasources.PagedDataSource
 		err    error
 	)
 
@@ -37,13 +43,12 @@ func GetList(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error) {
 		innerSelectorArray = append(innerSelectorArray, q)
 	}
 	// paginations
-	var pageNo int = 0
-	if val, found = criteriaMap.Get("pageNo"); found {
-		pageNo = val.(int)
+	if pageNo < 1 {
+		pageNo = 1
 	}
-	var pageSize int = 0
-	if val, found = criteriaMap.Get("pageSize"); found {
-		pageSize = val.(int)
+	usePagination := true
+	if pageSize < 1 {
+		usePagination = false
 	}
 
 	// Execute query
@@ -54,27 +59,37 @@ func GetList(criteriaMap *hashmap.Map) ([]*entities.BuyRecord, error) {
 		selector = innerSelectorArray[0]
 	}
 
-	// 转数组
-	//totalRecordCount := 100
-	//currentPage := 1
-	//pageSize := 10
-	//pagination := datasources.NewPagination(totalRecordCount, currentPage, pageSize)
-
 	skip := pageSize * (pageNo - 1)
 	limit := pageSize
 
-	dataList, err := dal.FindList(colName, selector, reflect.TypeOf(entities.BuyRecord{}), skip, limit)
+	// 查询
+	var (
+		itfList          []interface{}
+		totalRecordCount int64 = 0
+	)
+	if usePagination { // 分页
+		itfList, totalRecordCount, err = mongoDAL.FindList(colName, selector, reflect.TypeOf(entities.BuyRecord{}), skip, limit)
+	} else { // 不分页
+		itfList, err = mongoDAL.FindAll(colName, selector, reflect.TypeOf(entities.BuyRecord{}))
+	}
+	var dataList []*entities.BuyRecord = make([]*entities.BuyRecord, 0)
 	if nil == err {
-		for _, cur := range dataList {
+		for _, cur := range itfList {
 			val := cur.(*entities.BuyRecord)
-			result = append(result, val)
+			dataList = append(dataList, val)
 		}
+	}
+
+	// 数据源
+	result = &datasources.PagedDataSource{
+		DataList:   dataList,
+		Pagination: datasources.NewPagination(totalRecordCount, pageSize, pageNo),
 	}
 
 	return result, err
 }
 
-func Add(buyRecord *entities.BuyRecord) error {
+func AddBuyRecord(buyRecord *entities.BuyRecord) error {
 	var (
 		err error
 	)
@@ -85,21 +100,21 @@ func Add(buyRecord *entities.BuyRecord) error {
 	}
 
 	// 检查是否存在
-	found, err := Exists(buyRecord)
+	found, err := ExistsBuyRecord(buyRecord)
 	if nil == err {
 		if found {
 			err = errs.ERR_DUPLICATED
 		} else {
 			// 如果不存在，则添加
 			buyRecord.CreateTime = time.Now()
-			err = dal.Insert("sl_buy_record", buyRecord)
+			err = mongoDAL.Insert("sl_buy_record", buyRecord)
 		}
 	}
 
 	return err
 }
 
-func Exists(buyRecord *entities.BuyRecord) (bool, error) {
+func ExistsBuyRecord(buyRecord *entities.BuyRecord) (bool, error) {
 	var (
 		result bool
 		err    error
@@ -119,7 +134,7 @@ func Exists(buyRecord *entities.BuyRecord) (bool, error) {
 		}
 
 		// 检查是否已经存在相同记录
-		if count, err := dal.Count(colName, selector); nil != err {
+		if count, err := mongoDAL.Count(colName, selector); nil != err {
 			result = false
 		} else {
 			result = 0 < count

@@ -2,9 +2,11 @@ package book
 
 import (
 	"github.com/emirpasic/gods/lists/arraylist"
+	"github.com/emirpasic/gods/maps/hashmap"
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
-	"iamcc.cn/doubanbookapi/frameworks/services/impl/dal"
+	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
+	mongoDAL "iamcc.cn/doubanbookapi/frameworks/services/impl/dal/mongodb"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"reflect"
@@ -31,7 +33,7 @@ func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 		}
 
 		// 检查是否已经存在相同记录
-		foundValue, err := dal.FindOne(colName, selector)
+		foundValue, err := mongoDAL.FindOne(colName, selector)
 		if nil != err {
 			return result, err
 		}
@@ -44,12 +46,12 @@ func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 			result = entities.NewBookInfoByJson(jsonStr)
 			result.UpdateTime = time.Now()
 
-			err = dal.UpdateId(colName, result.Id, result)
+			err = mongoDAL.UpdateId(colName, result.Id, result)
 		} else { // 不存在，新增记录
 			result = bookInfo
 			result.CreateTime = time.Now()
 
-			err = dal.Insert(colName, result)
+			err = mongoDAL.Insert(colName, result)
 		}
 	}
 
@@ -72,7 +74,7 @@ func GetBook(id string) (*entities.BookInfo, error) {
 			"id": id,
 		}
 
-		val, err = dal.FindOne(colName, selector)
+		val, err = mongoDAL.FindOne(colName, selector)
 
 		if nil == err && nil != val {
 			jsonStr, err := utils.ToJsonString(val)
@@ -105,11 +107,81 @@ func GetBookAuthor(author string) (*entities.BookInfo, error) {
 			},
 		}
 
-		val, err = dal.FindOne(colName, selector)
+		val, err = mongoDAL.FindOne(colName, selector)
 		if nil == err && nil != val {
 			jsonStr := utils.MustToJsonString(val)
 			result = entities.NewBookInfoByJson(jsonStr)
 		}
+	}
+
+	return result, err
+}
+
+func GetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
+	var (
+		result *datasources.PagedDataSource
+		err    error
+	)
+
+	// Build query criterials
+	var (
+		selector           bson.M   = bson.M{}
+		innerSelectorArray []bson.M = []bson.M{}
+		val                interface{}
+		found              bool
+	)
+	if nil != criteriaMap {
+		if val, found = criteriaMap.Get("title"); found {
+			q := bson.M{"title": bson.M{"$regex": val}}
+			innerSelectorArray = append(innerSelectorArray, q)
+		}
+		if val, found = criteriaMap.Get("subtitle"); found {
+			q := bson.M{"subtitle": bson.M{"$regex": val}}
+			innerSelectorArray = append(innerSelectorArray, q)
+		}
+	}
+	// paginations
+	if pageNo < 1 {
+		pageNo = 1
+	}
+	usePagination := true
+	if pageSize < 1 {
+		usePagination = false
+	}
+
+	// Execute query
+	colName := "sl_book_new"
+	if len(innerSelectorArray) > 1 {
+		selector = bson.M{"$and": innerSelectorArray}
+	} else if len(innerSelectorArray) > 0 {
+		selector = innerSelectorArray[0]
+	}
+
+	skip := pageSize * (pageNo - 1)
+	limit := pageSize
+
+	// 查询
+	var (
+		itfList          []interface{}
+		totalRecordCount int64 = 0
+	)
+	if usePagination { // 分页
+		itfList, totalRecordCount, err = mongoDAL.FindList(colName, selector, reflect.TypeOf(entities.BookInfo{}), skip, limit)
+	} else { // 不分页
+		itfList, err = mongoDAL.FindAll(colName, selector, reflect.TypeOf(entities.BookInfo{}))
+	}
+	var dataList []*entities.BookInfo = make([]*entities.BookInfo, 0)
+	if nil == err {
+		for _, cur := range itfList {
+			val := cur.(*entities.BookInfo)
+			dataList = append(dataList, val)
+		}
+	}
+
+	// 数据源
+	result = &datasources.PagedDataSource{
+		DataList:   dataList,
+		Pagination: datasources.NewPagination(totalRecordCount, pageSize, pageNo),
 	}
 
 	return result, err
@@ -131,7 +203,7 @@ func GetBookTitle(title string) ([]*entities.BookInfo, error) {
 		}}
 
 		typ := reflect.TypeOf(entities.BookInfo{})
-		dataList, err := dal.FindAll(colName, selector, typ)
+		dataList, err := mongoDAL.FindAll(colName, selector, typ)
 		if nil == err {
 			for _, cur := range dataList {
 				val := cur.(*entities.BookInfo)
@@ -167,7 +239,7 @@ func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
 		selector := bson.M{"$or": isbnSelectorArray}
 
 		typ := reflect.TypeOf(entities.BookInfo{})
-		dataList, err := dal.FindAll(colName, selector, typ)
+		dataList, err := mongoDAL.FindAll(colName, selector, typ)
 		if nil == err {
 			for _, cur := range dataList {
 				val := cur.(*entities.BookInfo)
@@ -234,7 +306,7 @@ func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 			"isbn13": isbn,
 		}
 
-		val, err = dal.FindOne(colName, selector)
+		val, err = mongoDAL.FindOne(colName, selector)
 		if nil == err && nil != val {
 			jsonStr := utils.MustToJsonString(val)
 			result = entities.NewBookInfoByJson(jsonStr)

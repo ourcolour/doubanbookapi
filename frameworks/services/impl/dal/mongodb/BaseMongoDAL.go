@@ -1,11 +1,10 @@
-package dal
+package mongodb
 
 import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"iamcc.cn/doubanbookapi/configs"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
-	"iamcc.cn/doubanbookapi/utils"
 	"log"
 	"reflect"
 	"strings"
@@ -120,7 +119,7 @@ func FindAll(colName string, selector bson.M, typ reflect.Type) ([]interface{}, 
 	defer session.Close()
 	col := session.DB(configs.MGO_DATABASE).C(colName)
 
-	//log.Println(utils.ToJsonString(selector))
+	// 查询
 	query := col.Find(selector)
 
 	itr := query.Iter()
@@ -133,22 +132,29 @@ func FindAll(colName string, selector bson.M, typ reflect.Type) ([]interface{}, 
 	return result, err
 }
 
-func FindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) ([]interface{}, error) {
+func FindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) ([]interface{}, int64, error) {
 	var (
-		result []interface{} = make([]interface{}, 0)
-		err    error
+		result           []interface{} = make([]interface{}, 0)
+		totalRecordCount int64         = 0
+		err              error
 	)
 
 	session, err := connect()
 	if nil != err {
 		log.Printf("%s\n", err.Error())
-		return nil, err
+		return nil, totalRecordCount, err
 	}
 	defer session.Close()
 	col := session.DB(configs.MGO_DATABASE).C(colName)
 
-	log.Println(utils.ToJsonString(selector))
+	// 查询
 	query := col.Find(selector).Skip(skip).Limit(limit)
+	// 总记录数
+	totalRecordCount32, err := query.Count()
+	if nil != err {
+		return nil, totalRecordCount, err
+	}
+	totalRecordCount = int64(totalRecordCount32)
 
 	itr := query.Iter()
 	pObj := reflect.New(typ).Interface()
@@ -157,7 +163,7 @@ func FindList(colName string, selector bson.M, typ reflect.Type, skip int, limit
 		pObj = reflect.New(typ).Interface()
 	}
 
-	return result, err
+	return nil, totalRecordCount, err
 }
 
 func Count(colName string, selector bson.M) (int, error) {
@@ -196,12 +202,12 @@ func MustFindAll(colName string, selector bson.M, typ reflect.Type) []interface{
 	return result
 }
 
-func MustFindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) []interface{} {
-	result, err := FindList(colName, selector, typ, skip, limit)
+func MustFindList(colName string, selector bson.M, typ reflect.Type, skip int, limit int) ([]interface{}, int64) {
+	result, total, err := FindList(colName, selector, typ, skip, limit)
 	if nil != err {
 		log.Panicln(err)
 	}
-	return result
+	return result, total
 }
 
 // ---

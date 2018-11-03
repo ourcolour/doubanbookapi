@@ -8,16 +8,14 @@ import (
 )
 
 type Pagination struct {
-	//DataList []interface{}
-
 	CurrentPage int
 	PrevPage    int
 	NextPage    int
 
-	PageSize         int
-	PageCount        int
-	RecordCount      int
-	TotalRecordCount int
+	PageSize  int
+	PageCount int
+	//RecordCount int64
+	TotalRecordCount int64
 
 	IsFirst bool
 	IsLast  bool
@@ -41,14 +39,14 @@ func ParsePageArgs(ctx *gin.Context) (pageNo int, pageSize int) {
 	return
 }
 
-func NewPaginationByContext(ctx *gin.Context, totalRecordCount int) *Pagination {
+func NewPaginationByContext(ctx *gin.Context, totalRecordCount int64) *Pagination {
 	// Args
 	currentPage, pageSize := ParsePageArgs(ctx)
 
-	return NewPagination(totalRecordCount, currentPage, pageSize)
+	return NewPagination(totalRecordCount, pageSize, currentPage)
 }
 
-func NewPagination( /*dataList1 []interface{}, */ totalRecordCount int, currentPage int, pageSize int) *Pagination {
+func NewPagination( /*dataList1 []interface{}, */ totalRecordCount int64, pageSize int, currentPage int) *Pagination {
 	// RecordCount
 	//var recordCount int = 0
 	//if nil != dataList {

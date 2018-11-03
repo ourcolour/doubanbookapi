@@ -11,8 +11,7 @@ type DoubanApiService struct {
 }
 
 func NewDoubanApiService() services.IDoubanApiService {
-	var result services.IDoubanApiService = &DoubanApiService{}
-	return result
+	return services.IDoubanApiService(&DoubanApiService{})
 }
 
 func (this *DoubanApiService) GetBookByIsbn(isbn string) (*entities.BookInfo, error) {

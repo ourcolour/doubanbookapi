@@ -3,7 +3,7 @@ package _default
 import (
 	"iamcc.cn/doubanbookapi/configs"
 	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
-	"iamcc.cn/doubanbookapi/frameworks/services/impl/dal"
+	mongoDAL "iamcc.cn/doubanbookapi/frameworks/services/impl/dal/mongodb"
 )
 
 func VerifyDB() error {
@@ -12,7 +12,7 @@ func VerifyDB() error {
 	)
 
 	// Check DB
-	existed, err := dal.ExistsDabatase(configs.MGO_DATABASE)
+	existed, err := mongoDAL.ExistsDabatase(configs.MGO_DATABASE)
 	if nil != err {
 		return err
 	} else if !existed {
@@ -24,7 +24,7 @@ func VerifyDB() error {
 		"sl_book_new",
 	}
 	for _, curName := range colArray {
-		existed, err = dal.ExistsCollection(curName)
+		existed, err = mongoDAL.ExistsCollection(curName)
 		if nil != err {
 			return err
 		} else if !existed {

@@ -121,6 +121,16 @@ func (this *WebLauncher) Run() {
 			})
 		}
 		// ---
+		searchGroup := v1Group.Group("/search")
+		{
+			searchGroup.GET("/", func(c *gin.Context) {
+				controllers.SearchBookController_GetBookByTitle(c)
+			})
+			searchGroup.PUT("/", func(c *gin.Context) {
+				controllers.SearchBookController_SyncBook(c)
+			})
+		}
+		// ---
 	}
 	// ---
 	this.Router.Any("/favicon.ico", func(c *gin.Context) {
