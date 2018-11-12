@@ -2,6 +2,7 @@ package entities
 
 import (
 	"encoding/json"
+	"iamcc.cn/doubanbookapi/utils"
 	"log"
 	"strings"
 	"time"
@@ -41,4 +42,8 @@ func NewBuyRecordByJson(jsonStr string) *BuyRecord {
 	}
 
 	return &result
+}
+
+func NewBuyRecordBytInterface(itf interface{}) *BuyRecord {
+	return NewBuyRecordByJson(utils.MustToJsonString(itf))
 }

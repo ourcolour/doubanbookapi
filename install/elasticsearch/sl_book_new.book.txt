@@ -1,3 +1,4 @@
+curl -XPUT http://localhost:9200/index -H "Content-Type:application/json" -d '
 PUT sl_book_new
 {
   "settings": {
@@ -78,13 +79,21 @@ PUT sl_book_new
         },
         "isbn10": {
           "type": "text",
-          "analyzer": "ik_max_word",
-          "search_analyzer": "ik_max_word"
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         },
         "isbn13": {
           "type": "text",
-          "analyzer": "ik_max_word",
-          "search_analyzer": "ik_max_word"
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         },
         "origin_title": {
           "type": "text",
@@ -176,3 +185,4 @@ PUT sl_book_new
     }
   }
 }
+'

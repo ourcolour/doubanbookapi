@@ -7,17 +7,18 @@ and save it to local MongoDB.
 Now a days, we finished the feature search engine supported via ElasticSearch.
 
 ## Version
-    0.0.3
+
+* 0.0.3
 
 ## Content
 * Requirements
-* Installzation
+* Installation
 * Settings
 
 ## Requirements
 1. Internet connection
 2. MongoDB v4.0.1 (Single-node or Cluster)
-3. _[Optional]_ ElasticSearch v6.4.2 (with IK plugin)
+3. *[Optional]* ElasticSearch v6.4.2 (with IK plugin)
 
 ## Installation
 1. Make sure you have MongoDB installed and own the administrator role.
@@ -42,7 +43,7 @@ Website listening on:
 If you want to change, just modify the file below: 
 
 ```
-$RPJ_ROOT/configs/AppConfig.go
+<RPJ_ROOT>/configs/AppConfig.go
 ```
 
 ### DB Settings
@@ -50,7 +51,7 @@ $RPJ_ROOT/configs/AppConfig.go
 You can change MongoDB service here:
 
 ```$go
-$RPJ_ROOT/configs/MongoDBConfig.go
+<RPJ_ROOT>/configs/MongoDBConfig.go
 ```
 
 ### ES Settings
@@ -58,65 +59,82 @@ $RPJ_ROOT/configs/MongoDBConfig.go
 You can change ElasticSearch service here:
 
 ```$go
-$RPJ_ROOT/configs/EsConfig.go
+<RPJ_ROOT>/configs/EsConfig.go
 ```
 
 ## How to use
 
 ### Query API 
 
-##### Query Mongo directly and no search engine accelerate.
+> Query Mongo directly and no search engine accelerate.
 
-You can query book by *Isbn, Author* and even by douban book *Identifier*(id).
+You can query book by *Isbn, Author* and even by Douban book *Identifier*(id).
 
 - by isbn
-
-    Method 1:
+	
+	+ Method 1:
+		
+			curl -XGET http://localhost:8080/v1/book/isbn/{ISBN}
         
-        http://localhost:8080/v1/book/isbn/*{isbn}*
-        
-    Or use the alias method, it's shortter.
-        
-        http://localhost:8080/v1/book/*{isbn}*
-    
+   + Or use the alias method, it's pretty shorter.
+			
+			curl -XGET http://localhost:8080/v1/book/{ISBN}    
 - by author
 
-        http://localhost:8080/v1/book/author/*{author}*
+        curl -XGET http://localhost:8080/v1/book/author/{AUTHOR}
     
 - by douban idntifier
 
-        http://localhost:8080/v1/book/id/*{id}*
+        curl -XGET http://localhost:8080/v1/book/id/{DOUBAN_ID}
 
 
 Examples here:
 
 - by isbn
     
-        http://localhost:8080/v1/book/9787556820825
+        curl -XGET http://localhost:8080/v1/book/9787556820825
 
 - by ahthor
 
-        http://localhost:8080/v1/book/author/斯坦尼斯
+        curl -XGET http://localhost:8080/v1/book/author/斯坦尼斯
 
 - by douban id
 
-        http://localhost:8080/v1/book/id/26952828
+        curl -XGET http://localhost:8080/v1/book/id/26952828
+    
+### CIP API 
+
+> Douban book API could not provide CIP information.
+> 
+> But we can fetch books' CIP information from [opac.calis.edu.cn](CALIS)
+> 
+> **P.S. Special Thanks to CALIS.**
+
+- Query by `ISBN`
+
+	curl -XGET http://localhost:8080/v1/book/cip/{ISBN}
+	
+- Batch update local book CIPs
+	
+	> Query local existed books which do not contain cip field and fetch CIP by ISBN.
+
+	curl -XPOST http://localhost:8080/v1/book/cip
 
 ### Search API
 
-##### Data accelerated by ElasticSearch.
+> Data accelerated by ElasticSearch.
 
 - by `KEYWORD`
 
-    Basic query:
+    + Basic query:
     
-        http://localhost:8080/v1/search/?k={KEYWORD}
+ 		curl -XGET http://localhost:8080/v1/search/?k={KEYWORD}
         
-    Paged query result:
-        
-        http://localhost:8080/v1/search/?k={KEYWORD}&pageNo=2&pageSize=10
+    + Paged query result:
+		
+		curl -XGET http://localhost:8080/v1/search/?k={KEYWORD}&pageNo=2&pageSize=10
         
     The records in result set would be splited into 10 per page.
     
     Current page is the #*2nd* page.
-        
+

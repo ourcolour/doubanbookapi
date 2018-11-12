@@ -16,6 +16,7 @@ func getEsUrl() string {
 }
 
 func getClient() (*elastic.Client, error) {
+	elastic.SetSniff(configs.ES_ENABLE_SNIFFER)
 	url := getEsUrl()
 	return elastic.NewClient(elastic.SetURL(url))
 }
@@ -38,6 +39,23 @@ func Ping() (interface{}, int, error) {
 	result, delay, err = client.Ping(getEsUrl()).Do(context.Background())
 
 	return result, delay, err
+}
+
+func DeleteIndex(indexName string) (bool, error) {
+	var (
+		result bool
+		err    error
+	)
+
+	client, err := getClient()
+	if nil != err {
+		return result, err
+	}
+
+	resp, err := client.DeleteIndex(indexName).Do(context.Background())
+	result = resp.Acknowledged
+
+	return result, err
 }
 
 func DeleteAll(indexName string, typeName string) (int64, error) {
@@ -105,7 +123,7 @@ func BatchAdd(indexName string, typeName string, docList []interface{}) (int64, 
 	return result, err
 }
 
-func Search(indexName string, typeName string, queryString string, pageSize int, pageNo int) ([]*json.RawMessage, int64, error) {
+func Search(indexName string, typeName string, query elastic.Query, pageSize int, pageNo int) ([]*json.RawMessage, int64, error) {
 	var (
 		result           []*json.RawMessage = make([]*json.RawMessage, 0)
 		totalRecordCount int64              = 0
@@ -117,7 +135,7 @@ func Search(indexName string, typeName string, queryString string, pageSize int,
 		return result, totalRecordCount, err
 	}
 
-	query := elastic.NewQueryStringQuery(queryString)
+	//query := elastic.NewQueryStringQuery(queryString)
 	searchResult, err := client.Search(indexName).
 		Type(typeName).
 		Query(query).

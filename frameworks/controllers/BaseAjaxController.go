@@ -50,6 +50,7 @@ func GetRequestBody(c *gin.Context) ([]byte, error) {
 
 	// 参数
 	result, err = ioutil.ReadAll(c.Request.Body)
+	defer c.Request.Body.Close()
 
 	return result, err
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type IDoubanApiService interface {
-	GetBookByIsbn(isbn string) (*entities.BookInfo, error)
+	GetBookByIsbn(isbn string) (*entities.Book, error)
 }

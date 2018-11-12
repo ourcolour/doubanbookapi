@@ -40,9 +40,9 @@ func (this *BookService) GetBookBy(criteriaMap *hashmap.Map) (*datasources.DataS
 	return datasources.FromPagedDataSource(pds), err
 }
 
-func (this *BookService) GetRankInIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
+func (this *BookService) GetRankInIsbn(isbnList *arraylist.List) ([]*entities.Book, error) {
 	var (
-		result []*entities.BookInfo = []*entities.BookInfo{}
+		result []*entities.Book = []*entities.Book{}
 		err    error
 	)
 
@@ -58,9 +58,9 @@ func (this *BookService) GetRankInIsbn(isbnList *arraylist.List) ([]*entities.Bo
 	return result, err
 }
 
-func (this *BookService) AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
+func (this *BookService) AddOrUpdateBook(bookInfo *entities.Book) (*entities.Book, error) {
 	var (
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -74,7 +74,7 @@ func (this *BookService) AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities
 
 	return result, err
 }
-func (this *BookService) GetBook(id string) (*entities.BookInfo, error) {
+func (this *BookService) GetBook(id string) (*entities.Book, error) {
 	// 参数
 	if "" == id {
 		return nil, errs.ERR_INVALID_PARAMETERS
@@ -86,7 +86,7 @@ func (this *BookService) GetBook(id string) (*entities.BookInfo, error) {
 	return data, err
 }
 
-func (this *BookService) GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
+func (this *BookService) GetBookByIsbn(isbn string) (*entities.Book, error) {
 	// 参数
 	if "" == isbn {
 		return nil, errs.ERR_INVALID_PARAMETERS
@@ -103,7 +103,7 @@ func (this *BookService) GetBookByIsbn(isbn string) (*entities.BookInfo, error) 
 	return data, err
 }
 
-func (this *BookService) GetBookByAuthor(author string) (*entities.BookInfo, error) {
+func (this *BookService) GetBookByAuthor(author string) (*entities.Book, error) {
 	// 参数
 	if 0 == strings.Compare("", author) {
 		return nil, errs.ERR_INVALID_PARAMETERS
@@ -115,7 +115,7 @@ func (this *BookService) GetBookByAuthor(author string) (*entities.BookInfo, err
 	return data, err
 }
 
-func (this *BookService) GetBookByTitle(title string) ([]*entities.BookInfo, error) {
+func (this *BookService) GetBookByTitle(title string) ([]*entities.Book, error) {
 	// 参数
 	if 0 == strings.Compare("", title) {
 		return nil, errs.ERR_INVALID_PARAMETERS

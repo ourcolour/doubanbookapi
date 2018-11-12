@@ -397,6 +397,7 @@ func ExistsCollection(colName string) (bool, error) {
 		err    error
 	)
 
+	// 参数
 	if "" == colName {
 		err = errs.ERR_INVALID_PARAMETERS
 		return result, err

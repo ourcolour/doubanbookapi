@@ -9,11 +9,11 @@ import (
 
 type IBookService interface {
 	// Book
-	AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error)
-	GetBook(id string) (*entities.BookInfo, error)
-	GetBookByIsbn(isbn string) (*entities.BookInfo, error)
-	GetBookByAuthor(author string) (*entities.BookInfo, error)
-	GetBookByTitle(title string) ([]*entities.BookInfo, error)
+	AddOrUpdateBook(bookInfo *entities.Book) (*entities.Book, error)
+	GetBook(id string) (*entities.Book, error)
+	GetBookByIsbn(isbn string) (*entities.Book, error)
+	GetBookByAuthor(author string) (*entities.Book, error)
+	GetBookByTitle(title string) ([]*entities.Book, error)
 
 	GetBookBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error)
 	PagedGetBookBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error)
@@ -24,5 +24,5 @@ type IBookService interface {
 	PagedGetBuyRecordBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error)
 
 	// Rank
-	GetRankInIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error)
+	GetRankInIsbn(isbnList *arraylist.List) ([]*entities.Book, error)
 }

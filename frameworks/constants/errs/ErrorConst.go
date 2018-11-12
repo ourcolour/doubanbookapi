@@ -8,6 +8,7 @@ var (
 	ERR_NOT_IMPLEMENTED = errors.New("暂未实现")
 	ERR_OK              = errors.New("执行成功")
 
+	ERR_BAD_REQUEST              = errors.New("错误的请求")
 	ERR_NOT_FOUND                = errors.New("内容未找到")
 	ERR_DUPLICATED               = errors.New("内容已经存在")
 	ERR_INVALID_PARAMETERS       = errors.New("无效的参数")

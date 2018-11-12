@@ -4,6 +4,6 @@ import (
 	"iamcc.cn/doubanbookapi/utils"
 )
 
-func (this *BookInfo) ToJsonString() (string, error) {
+func (this *Book) ToJsonString() (string, error) {
 	return utils.ToJsonString(this)
 }

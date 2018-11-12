@@ -18,10 +18,7 @@ func BuyRecordController_Add(c *gin.Context) {
 		Isbn     string `json:"isbn" bson:"isbn"`
 		Store    string `json:"store" bson:"store"`
 		Quantity int    `json:"quantity" bson:"quantity"`
-
-		BuyDate    string `json:"buy_date" bson:"buy_date"`
-		CreateTime string `json:"create_time" bson:"create_time"`
-		UpdateTime string `json:"update_time" bson:"update_time"`
+		BuyDate  string `json:"buy_date" bson:"buy_date"`
 	}
 	queryInfo := QueryInfo{}
 	err := c.BindJSON(&queryInfo)

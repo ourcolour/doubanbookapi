@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"github.com/emirpasic/gods/maps/hashmap"
+	"github.com/olivere/elastic"
 	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"iamcc.cn/doubanbookapi/webs/services"
@@ -14,8 +16,12 @@ func NewSearchService() services.ISearchService {
 	return services.ISearchService(&SearchService{})
 }
 
-func (this *SearchService) SearchBook(keyword string, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
-	return searchBL.SearchBook(keyword, pageSize, pageNo)
+func (this *SearchService) SearchBook(keyword string, criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
+	return searchBL.SearchBook(keyword, criteriaMap, pageSize, pageNo)
+}
+
+func (this *SearchService) SearchBookByQuery(query elastic.Query, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
+	return searchBL.SearchBookByQuery(query, pageSize, pageNo)
 }
 
 func (this *SearchService) DeleteAllBook() (int64, error) {
@@ -35,7 +41,7 @@ func (this *SearchService) SyncBook() (int64, int64, error) {
 	if nil != err {
 		return delCount, addCount, err
 	}
-	bookList := ds.DataList.([]*entities.BookInfo)
+	bookList := ds.DataList.([]*entities.Book)
 
 	if nil == bookList || len(bookList) < 1 {
 		return delCount, addCount, err

@@ -116,15 +116,25 @@ func (this *WebLauncher) Run() {
 			bookGroup.GET("/*action", func(c *gin.Context) {
 				controllers.BookController_ActionDispatcher(c)
 			})
-			bookGroup.POST("/", func(c *gin.Context) {
-				log.Println("POST")
+			bookGroup.POST("/cip", func(c *gin.Context) {
+				controllers.BookController_UpdateLocalBookCip(c)
+			})
+		}
+		// ---
+		isbnGroup := v1Group.Group("/isbn")
+		{
+			isbnGroup.GET("/convert", func(c *gin.Context) {
+				controllers.IsbnController_Convert(c)
+			})
+			isbnGroup.GET("/draw", func(c *gin.Context) {
+				controllers.IsbnController_Draw(c)
 			})
 		}
 		// ---
 		searchGroup := v1Group.Group("/search")
 		{
-			searchGroup.GET("/", func(c *gin.Context) {
-				controllers.SearchBookController_GetBookByTitle(c)
+			searchGroup.GET("/*action", func(c *gin.Context) {
+				controllers.SearchBookController_ActionDispatcher(c)
 			})
 			searchGroup.PUT("/", func(c *gin.Context) {
 				controllers.SearchBookController_SyncBook(c)
@@ -146,6 +156,13 @@ func (this *WebLauncher) Run() {
 	// 404 Page
 	this.Router.Any("/404", func(c *gin.Context) {
 		controllers.DefaultController_404Error(c)
+	})
+	// 404 Page
+	this.Router.Any("/1", func(c *gin.Context) {
+		c.File("/Volumes/Iron Pan/docker-compose.local.yml")
+	})
+	this.Router.Any("/docker-container.local.yml", func(c *gin.Context) {
+		c.File("/Volumes/Iron Pan/docker-container.local.yml")
 	})
 	this.Router.NoRoute(func(c *gin.Context) {
 		controllers.DefaultController_404Error(c)

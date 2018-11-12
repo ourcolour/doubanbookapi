@@ -14,9 +14,9 @@ import (
 	"time"
 )
 
-func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
+func AddOrUpdateBook(bookInfo *entities.Book) (*entities.Book, error) {
 	var (
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -39,14 +39,11 @@ func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 		}
 
 		if nil != foundValue { // 已经存在，更新现有记录
-			jsonStr, err := utils.ToJsonString(foundValue)
-			if nil != err {
-				return result, err
-			}
-			result = entities.NewBookInfoByJson(jsonStr)
+			result = bookInfo
 			result.UpdateTime = time.Now()
 
-			err = mongoDAL.UpdateId(colName, result.Id, result)
+			book := entities.NewBookByInterface(foundValue)
+			err = mongoDAL.UpdateId(colName, book.ObjectId, result)
 		} else { // 不存在，新增记录
 			result = bookInfo
 			result.CreateTime = time.Now()
@@ -58,11 +55,11 @@ func AddOrUpdateBook(bookInfo *entities.BookInfo) (*entities.BookInfo, error) {
 	return result, err
 }
 
-func GetBook(id string) (*entities.BookInfo, error) {
+func GetBook(id string) (*entities.Book, error) {
 	var (
 		val interface{}
 
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -81,18 +78,18 @@ func GetBook(id string) (*entities.BookInfo, error) {
 			if nil != err {
 				return result, err
 			}
-			result = entities.NewBookInfoByJson(jsonStr)
+			result = entities.NewBookByJson(jsonStr)
 		}
 	}
 
 	return result, err
 }
 
-func GetBookAuthor(author string) (*entities.BookInfo, error) {
+func GetBookAuthor(author string) (*entities.Book, error) {
 	var (
 		val interface{}
 
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -110,7 +107,7 @@ func GetBookAuthor(author string) (*entities.BookInfo, error) {
 		val, err = mongoDAL.FindOne(colName, selector)
 		if nil == err && nil != val {
 			jsonStr := utils.MustToJsonString(val)
-			result = entities.NewBookInfoByJson(jsonStr)
+			result = entities.NewBookByJson(jsonStr)
 		}
 	}
 
@@ -137,6 +134,10 @@ func GetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasou
 		}
 		if val, found = criteriaMap.Get("subtitle"); found {
 			q := bson.M{"subtitle": bson.M{"$regex": val}}
+			innerSelectorArray = append(innerSelectorArray, q)
+		}
+		if val, found = criteriaMap.Get("cipsExists"); found {
+			q := bson.M{"cips": bson.M{"$exists": val}}
 			innerSelectorArray = append(innerSelectorArray, q)
 		}
 	}
@@ -166,14 +167,14 @@ func GetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasou
 		totalRecordCount int64 = 0
 	)
 	if usePagination { // 分页
-		itfList, totalRecordCount, err = mongoDAL.FindList(colName, selector, reflect.TypeOf(entities.BookInfo{}), skip, limit)
+		itfList, totalRecordCount, err = mongoDAL.FindList(colName, selector, reflect.TypeOf(entities.Book{}), skip, limit)
 	} else { // 不分页
-		itfList, err = mongoDAL.FindAll(colName, selector, reflect.TypeOf(entities.BookInfo{}))
+		itfList, err = mongoDAL.FindAll(colName, selector, reflect.TypeOf(entities.Book{}))
 	}
-	var dataList []*entities.BookInfo = make([]*entities.BookInfo, 0)
+	var dataList []*entities.Book = make([]*entities.Book, 0)
 	if nil == err {
 		for _, cur := range itfList {
-			val := cur.(*entities.BookInfo)
+			val := cur.(*entities.Book)
 			dataList = append(dataList, val)
 		}
 	}
@@ -187,9 +188,9 @@ func GetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasou
 	return result, err
 }
 
-func GetBookTitle(title string) ([]*entities.BookInfo, error) {
+func GetBookTitle(title string) ([]*entities.Book, error) {
 	var (
-		result []*entities.BookInfo
+		result []*entities.Book
 		err    error
 	)
 
@@ -202,11 +203,11 @@ func GetBookTitle(title string) ([]*entities.BookInfo, error) {
 			bson.M{"subtitle": bson.RegEx{Pattern: title, Options: "i"}},
 		}}
 
-		typ := reflect.TypeOf(entities.BookInfo{})
+		typ := reflect.TypeOf(entities.Book{})
 		dataList, err := mongoDAL.FindAll(colName, selector, typ)
 		if nil == err {
 			for _, cur := range dataList {
-				val := cur.(*entities.BookInfo)
+				val := cur.(*entities.Book)
 				if nil != val {
 					result = append(result, val)
 				}
@@ -217,9 +218,9 @@ func GetBookTitle(title string) ([]*entities.BookInfo, error) {
 	return result, err
 }
 
-func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
+func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.Book, error) {
 	var (
-		result []*entities.BookInfo
+		result []*entities.Book
 		err    error
 	)
 
@@ -238,11 +239,11 @@ func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
 		colName := "sl_book_new"
 		selector := bson.M{"$or": isbnSelectorArray}
 
-		typ := reflect.TypeOf(entities.BookInfo{})
+		typ := reflect.TypeOf(entities.Book{})
 		dataList, err := mongoDAL.FindAll(colName, selector, typ)
 		if nil == err {
 			for _, cur := range dataList {
-				val := cur.(*entities.BookInfo)
+				val := cur.(*entities.Book)
 				if nil != val {
 					result = append(result, val)
 				}
@@ -253,9 +254,9 @@ func GetBookListByIsbn(isbnList *arraylist.List) ([]*entities.BookInfo, error) {
 	return result, err
 }
 
-func Sort(bookArray []*entities.BookInfo) []*entities.BookInfo {
+func Sort(bookArray []*entities.Book) []*entities.Book {
 	// 排序
-	score := func(b1, b2 *entities.BookInfo) bool {
+	score := func(b1, b2 *entities.Book) bool {
 		score1 := float64(b1.Rating.NumRaters) * b1.Rating.Average
 		score2 := float64(b2.Rating.NumRaters) * b2.Rating.Average
 		return score1 > score2
@@ -265,9 +266,9 @@ func Sort(bookArray []*entities.BookInfo) []*entities.BookInfo {
 	return bookArray
 }
 
-type SortBy func(b1 *entities.BookInfo, b2 *entities.BookInfo) bool
+type SortBy func(b1 *entities.Book, b2 *entities.Book) bool
 
-func (by SortBy) Sort(books []*entities.BookInfo) {
+func (by SortBy) Sort(books []*entities.Book) {
 	bookSlice := &BookScoreSorter{
 		Books: books,
 		By:    by,
@@ -276,8 +277,8 @@ func (by SortBy) Sort(books []*entities.BookInfo) {
 }
 
 type BookScoreSorter struct {
-	Books []*entities.BookInfo
-	By    func(b1 *entities.BookInfo, b2 *entities.BookInfo) bool
+	Books []*entities.Book
+	By    func(b1 *entities.Book, b2 *entities.Book) bool
 }
 
 func (this *BookScoreSorter) Len() int {
@@ -290,11 +291,11 @@ func (this *BookScoreSorter) Less(b1, b2 int) bool {
 	return this.By(this.Books[b1], this.Books[b2])
 }
 
-func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
+func GetBookByIsbn(isbn string) (*entities.Book, error) {
 	var (
 		val interface{}
 
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -309,7 +310,7 @@ func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 		val, err = mongoDAL.FindOne(colName, selector)
 		if nil == err && nil != val {
 			jsonStr := utils.MustToJsonString(val)
-			result = entities.NewBookInfoByJson(jsonStr)
+			result = entities.NewBookByJson(jsonStr)
 		}
 	}
 

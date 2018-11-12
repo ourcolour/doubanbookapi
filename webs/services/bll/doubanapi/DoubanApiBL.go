@@ -2,8 +2,8 @@ package doubanapi
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"regexp"
@@ -49,9 +49,9 @@ var DEFAULT_REQUEST_HEADER = map[string]string{
 	"Referer": "https://" + DOUBAN_BOOK_DOMAIN + "/",
 }
 
-func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
+func GetBookByIsbn(isbn string) (*entities.Book, error) {
 	var (
-		result *entities.BookInfo
+		result *entities.Book
 		err    error
 	)
 
@@ -60,11 +60,11 @@ func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 
 	itf, err := utils.HttpGet(apiUrl, nil, headers, func(data []byte) (result interface{}, err error) {
 		if nil == data {
-			err = errors.New("Invalid parameters.")
+			err = errs.ERR_INVALID_PARAMETERS
 			return result, err
 		}
 
-		result = &entities.BookInfo{}
+		result = &entities.Book{}
 		data = fixBookInfoJson(data)
 		json.Unmarshal(data, result)
 
@@ -72,7 +72,7 @@ func GetBookByIsbn(isbn string) (*entities.BookInfo, error) {
 	})
 
 	if nil == err {
-		result = itf.(*entities.BookInfo)
+		result = itf.(*entities.Book)
 	}
 
 	return result, err

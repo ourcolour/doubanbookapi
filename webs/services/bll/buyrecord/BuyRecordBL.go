@@ -42,6 +42,7 @@ func GetBuyRecordListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*da
 		q := bson.M{"store": bson.M{"$regex": val}}
 		innerSelectorArray = append(innerSelectorArray, q)
 	}
+
 	// paginations
 	if pageNo < 1 {
 		pageNo = 1
@@ -100,7 +101,10 @@ func AddBuyRecord(buyRecord *entities.BuyRecord) error {
 	}
 
 	// 检查是否存在
-	found, err := ExistsBuyRecord(buyRecord)
+	criteriaMap := hashmap.New()
+	criteriaMap.Put("isbn", buyRecord.Isbn)
+
+	found, err := ExistsBuyRecordBy(criteriaMap)
 	if nil == err {
 		if found {
 			err = errs.ERR_DUPLICATED
@@ -114,31 +118,39 @@ func AddBuyRecord(buyRecord *entities.BuyRecord) error {
 	return err
 }
 
-func ExistsBuyRecord(buyRecord *entities.BuyRecord) (bool, error) {
+func ExistsBuyRecordBy(criteriaMap *hashmap.Map) (bool, error) {
 	var (
 		result bool
 		err    error
 	)
 
-	if nil == buyRecord {
-		err = errs.ERR_INVALID_PARAMETERS
+	// Build query criterials
+	var (
+		selector           bson.M   = bson.M{}
+		innerSelectorArray []bson.M = []bson.M{}
+		val                interface{}
+		found              bool
+	)
+	if nil != criteriaMap {
+		if val, found = criteriaMap.Get("isbn"); found {
+			q := bson.M{"isbn": bson.M{"$regex": val}}
+			innerSelectorArray = append(innerSelectorArray, q)
+		}
+	}
+
+	// Execute query
+	if len(innerSelectorArray) > 1 {
+		selector = bson.M{"$and": innerSelectorArray}
+	} else if len(innerSelectorArray) > 0 {
+		selector = innerSelectorArray[0]
+	}
+
+	// 检查是否已经存在相同记录
+	colName := "sl_buy_record"
+	if count, err := mongoDAL.Count(colName, selector); nil != err {
 		result = false
 	} else {
-		colName := "sl_buy_record"
-		selector := bson.M{
-			"$or": []bson.M{
-				bson.M{"isbn": buyRecord.Isbn},
-				bson.M{"store": buyRecord.Store},
-				bson.M{"buy_date": buyRecord.BuyDate},
-			},
-		}
-
-		// 检查是否已经存在相同记录
-		if count, err := mongoDAL.Count(colName, selector); nil != err {
-			result = false
-		} else {
-			result = 0 < count
-		}
+		result = 0 < count
 	}
 
 	return result, err
