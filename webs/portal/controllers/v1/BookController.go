@@ -97,38 +97,32 @@ func BookController_DrawThumbnailByIsbn(c *gin.Context, isbn string, size uint) 
 }
 
 func BookController_UpdateLocalBookCip(c *gin.Context) {
-	calisApiService := NewCalisApiService()
-	data, err := calisApiService.UpdateLocalBookCip()
+	data, err := NewCalisApiService().UpdateLocalBookCip()
 	Json(c, data, err)
 }
 
 func BookController_GetCipByIsbn(c *gin.Context, isbn string) {
-	calisService := NewCalisApiService()
-	data, err := calisService.GetCipByIsbn(isbn)
+	data, err := NewCalisApiService().GetCipByIsbn(isbn)
 	Json(c, data, err)
 }
 
 func BookController_GetBookByIsbn(c *gin.Context, isbn string) {
-	bookService := NewBookService()
-	data, err := bookService.GetBookByIsbn(isbn)
+	data, err := NewBookService().GetBookByIsbn(isbn)
 	Json(c, data, err)
 }
 
 func BookController_GetBookById(c *gin.Context, id string) {
-	bookService := NewBookService()
-	data, err := bookService.GetBook(id)
+	data, err := NewBookService().GetBook(id)
 	Json(c, data, err)
 }
 
 func BookController_GetBookByAuthor(c *gin.Context, author string) {
-	bookService := NewBookService()
-	data, err := bookService.GetBookByAuthor(author)
+	data, err := NewBookService().GetBookByAuthor(author)
 	Json(c, data, err)
 }
 
 func BookController_GetBookByTitle(c *gin.Context, title string) {
-	bookService := NewBookService()
-	data, err := bookService.GetBookByTitle(title)
+	data, err := NewBookService().GetBookByTitle(title)
 	Json(c, data, err)
 }
 
@@ -142,7 +136,6 @@ func BookController_Rank(c *gin.Context) {
 		return
 	}
 
-	bookService := NewBookService()
-	bookList, err := bookService.GetRankInIsbn(&isbnList)
+	bookList, err := NewBookService().GetRankInIsbn(&isbnList)
 	Json(c, bookList, err)
 }

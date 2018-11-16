@@ -15,8 +15,8 @@ type IBookService interface {
 	GetBookByAuthor(author string) (*entities.Book, error)
 	GetBookByTitle(title string) ([]*entities.Book, error)
 
-	GetBookBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error)
-	PagedGetBookBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error)
+	GetBookListBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error)
+	PagedGetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error)
 
 	// Buy record
 	AddBuyRecord(*entities.BuyRecord) (*entities.BuyRecord, error)
@@ -25,4 +25,6 @@ type IBookService interface {
 
 	// Rank
 	GetRankInIsbn(isbnList *arraylist.List) ([]*entities.Book, error)
+
+	RemoveDuplicate() error
 }

@@ -10,6 +10,7 @@ import (
 	"iamcc.cn/doubanbookapi/webs/services"
 	bookBL "iamcc.cn/doubanbookapi/webs/services/bll/book"
 	buyrecordBL "iamcc.cn/doubanbookapi/webs/services/bll/buyrecord"
+	"log"
 	"strings"
 	"time"
 )
@@ -21,7 +22,7 @@ func NewBookService() services.IBookService {
 	return services.IBookService(&BookService{})
 }
 
-func (this *BookService) PagedGetBookBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
+func (this *BookService) PagedGetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasources.PagedDataSource, error) {
 	var (
 		result *datasources.PagedDataSource
 		err    error
@@ -33,7 +34,7 @@ func (this *BookService) PagedGetBookBy(criteriaMap *hashmap.Map, pageSize int, 
 	return result, err
 }
 
-func (this *BookService) GetBookBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error) {
+func (this *BookService) GetBookListBy(criteriaMap *hashmap.Map) (*datasources.DataSource, error) {
 	// 参数
 	pds, err := bookBL.GetBookListBy(criteriaMap, 0, 0)
 
@@ -162,4 +163,31 @@ func (this *BookService) AddBuyRecord(buyRecord *entities.BuyRecord) (*entities.
 	err := buyrecordBL.AddBuyRecord(buyRecord)
 
 	return buyRecord, err
+}
+
+// TODO: 测试用
+func (this *BookService) RemoveDuplicate() error {
+	criteriaMap := hashmap.New()
+	//criteriaMap.Put("", "")
+
+	ds, err := this.GetBookListBy(criteriaMap)
+
+	// 记录 isbn13
+	dataList := ds.DataList.([]*entities.Book)
+	isbn13List := arraylist.New()
+
+	for _, book := range dataList {
+		if nil != book {
+			targetField := book.Id
+			if !isbn13List.Contains(targetField) {
+				isbn13List.Add(targetField)
+
+				log.Printf("[ADD] %s TOTAL:%d\n", targetField, isbn13List.Size())
+			} else {
+				log.Printf("[ERR] %s TOTAL:%d\n", targetField, isbn13List.Size())
+			}
+		}
+	}
+
+	return err
 }

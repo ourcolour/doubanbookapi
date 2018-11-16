@@ -25,10 +25,10 @@ func (this *DoubanApiService) GetBookByIsbn(isbn string) (*entities.Book, error)
 
 	// 更新 cip
 	if nil == err {
-		cipArray, err := NewCalisApiService().GetCipByIsbn(isbn)
-		if nil == err {
-			data.Cips = cipArray
-		}
+		//cipArray, err := NewCalisApiService().GetCipByIsbn(isbn)
+		//if nil == err {
+		//	data.Cips = cipArray
+		//}
 
 		// 保存到本地
 		if nil != data {

@@ -37,7 +37,7 @@ func (this *SearchService) SyncBook() (int64, int64, error) {
 
 	// 查询已有记录
 	bookService := NewBookService()
-	ds, err := bookService.GetBookBy(nil)
+	ds, err := bookService.GetBookListBy(nil)
 	if nil != err {
 		return delCount, addCount, err
 	}

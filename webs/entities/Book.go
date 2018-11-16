@@ -29,7 +29,7 @@ type Tag struct {
 }
 
 type Book struct {
-	ObjectId bson.ObjectId `json:"_id" bson:"_id"`
+	ObjectId bson.ObjectId `json:"id" bson:"_id"`
 
 	Rating *Rating `json:"rating" bson:"rating"`
 

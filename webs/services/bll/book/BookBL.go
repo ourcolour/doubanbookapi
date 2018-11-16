@@ -140,6 +140,10 @@ func GetBookListBy(criteriaMap *hashmap.Map, pageSize int, pageNo int) (*datasou
 			q := bson.M{"cips": bson.M{"$exists": val}}
 			innerSelectorArray = append(innerSelectorArray, q)
 		}
+		if val, found = criteriaMap.Get("cipsHasElements"); found {
+			q := bson.M{"cips": bson.M{"$size": val}}
+			innerSelectorArray = append(innerSelectorArray, q)
+		}
 	}
 	// paginations
 	if pageNo < 1 {

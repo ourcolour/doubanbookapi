@@ -5,7 +5,6 @@ import (
 	"iamcc.cn/doubanbookapi/webs/entities"
 	"iamcc.cn/doubanbookapi/webs/services"
 	bll "iamcc.cn/doubanbookapi/webs/services/bll/calisapi"
-	"log"
 	"strings"
 )
 
@@ -43,20 +42,27 @@ func (this *CalisApiService) GetCipByIsbn(isbn string) ([]string, error) {
 	return result, err
 }
 
-func (this *CalisApiService) UpdateLocalBookCip() ([]*entities.Book, error) {
+func (this *CalisApiService) UpdateLocalBookCip() (map[string][]string, error) {
+	// 参数
 	var (
 		bookService services.IBookService = NewBookService()
-
-		result []*entities.Book = make([]*entities.Book, 0)
-		err    error
+		result      map[string][]string
+		err         error
 	)
 
 	// 查找本地记录
 	criteriaMap := hashmap.New()
 	criteriaMap.Put("cipsExists", false)
-	ds, err := bookService.GetBookBy(criteriaMap)
+	//criteriaMap.Put("cipsHasElements", 0)
+	ds, err := bookService.GetBookListBy(criteriaMap)
+	if nil != err {
+		return nil, err
+	}
 
 	// 准备返回的数据
+	succeededList := make([]string, 0)
+	failedList := make([]string, 0)
+
 	// 调用 Calid 服务，更新 cip
 	dataList := ds.DataList.([]*entities.Book)
 	for _, book := range dataList {
@@ -66,11 +72,22 @@ func (this *CalisApiService) UpdateLocalBookCip() ([]*entities.Book, error) {
 			book.Cips = cipArray
 		}
 
-		book, err = bookService.AddOrUpdateBook(book)
-		if nil == err {
-			log.Printf("%s <<%s>> --------> %v", book.Isbn13, book.Title, book.Cips)
-			result = append(result, book)
+		// 更新本地 book 的 cip 字段
+		newBook, err := bookService.AddOrUpdateBook(book)
+		oldObjectId := book.ObjectId.Hex()
+		newObjectId := newBook.ObjectId.Hex()
+
+		if nil != err {
+			failedList = append(failedList, oldObjectId)
+		} else {
+			succeededList = append(succeededList, newObjectId)
 		}
+	}
+
+	// 返回结果
+	result = map[string][]string{
+		"succeeded": succeededList,
+		"failed":    failedList,
 	}
 
 	return result, err

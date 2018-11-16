@@ -41,6 +41,15 @@ PUT sl_book_new
           "analyzer": "ik_max_word",
           "search_analyzer": "ik_max_word"
         },
+        "cips": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
         "create_time": {
           "type": "date"
         },

@@ -123,10 +123,10 @@ func (this *WebLauncher) Run() {
 		// ---
 		isbnGroup := v1Group.Group("/isbn")
 		{
-			isbnGroup.GET("/convert", func(c *gin.Context) {
+			isbnGroup.GET("/convert/:isbn", func(c *gin.Context) {
 				controllers.IsbnController_Convert(c)
 			})
-			isbnGroup.GET("/draw", func(c *gin.Context) {
+			isbnGroup.GET("/draw/:isbn", func(c *gin.Context) {
 				controllers.IsbnController_Draw(c)
 			})
 		}
@@ -137,6 +137,9 @@ func (this *WebLauncher) Run() {
 				controllers.SearchBookController_ActionDispatcher(c)
 			})
 			searchGroup.PUT("/", func(c *gin.Context) {
+				controllers.SearchBookController_SyncBook(c)
+			})
+			searchGroup.POST("/", func(c *gin.Context) {
 				controllers.SearchBookController_SyncBook(c)
 			})
 		}

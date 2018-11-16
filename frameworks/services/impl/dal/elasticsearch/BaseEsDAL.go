@@ -77,8 +77,12 @@ func DeleteAll(indexName string, typeName string) (int64, error) {
 		return result, err
 	}
 
-	resp, err := client.DeleteByQuery(indexName).Type().QueryString("*").Do(context.Background())
-	result = resp.Deleted
+	resp, err := client.DeleteByQuery(indexName).Query(elastic.NewQueryStringQuery("*")).Do(context.Background())
+	if nil != err {
+		return result, err
+	} else {
+		result = resp.Deleted
+	}
 
 	return result, err
 }

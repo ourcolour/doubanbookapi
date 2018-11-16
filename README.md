@@ -120,6 +120,14 @@ Examples here:
 
 	curl -XPOST http://localhost:8080/v1/book/cip
 
+### ISBN API
+
+- Convert between ISBN13 and ISBN10
+    
+    curl -XGET http://localhost:8080/v1/isbn/convert/{ISBN}
+    
+    > The parameter {ISBN} could be 10-bits or 13-bits.
+
 ### Search API
 
 > Data accelerated by ElasticSearch.
