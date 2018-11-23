@@ -101,6 +101,12 @@ func (this *BookService) GetBookByIsbn(isbn string) (*entities.Book, error) {
 		data, err = NewDoubanApiService().GetBookByIsbn(isbn)
 	}
 
+	//if 0 == strings.Compare("", strings.TrimSpace(data.Title)) ||
+	//	0 == strings.Compare("", strings.TrimSpace(data.Isbn13)) {
+	//	data, err = NewDoubanApiService().GetBookByIsbn(isbn)
+	//	log.Println("D")
+	//}
+
 	return data, err
 }
 

@@ -8,6 +8,7 @@ import (
 	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
 	elasticsearchDAL "iamcc.cn/doubanbookapi/frameworks/services/impl/dal/elasticsearch"
 	"iamcc.cn/doubanbookapi/webs/entities"
+	"iamcc.cn/doubanbookapi/webs/entities/es"
 	"log"
 	"strings"
 )
@@ -125,12 +126,12 @@ func DeleteAllBook() (int64, error) {
 	return elasticsearchDAL.DeleteAll(indexName, typeName)
 }
 
-func AddBook(book *entities.Book) (bool, error) {
-	res, err := BatchAddBook([]*entities.Book{book})
+func AddBook(book *es.ES_Book) (bool, error) {
+	res, err := BatchAddBook([]*es.ES_Book{book})
 	return 0 < res, err
 }
 
-func BatchAddBook(bookList []*entities.Book) (int64, error) {
+func BatchAddBook(bookList []*es.ES_Book) (int64, error) {
 	var (
 		result int64
 		err    error

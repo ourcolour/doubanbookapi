@@ -9,6 +9,7 @@ import (
 	mongoDAL "iamcc.cn/doubanbookapi/frameworks/services/impl/dal/mongodb"
 	"iamcc.cn/doubanbookapi/utils"
 	"iamcc.cn/doubanbookapi/webs/entities"
+	"log"
 	"reflect"
 	"sort"
 	"time"
@@ -39,16 +40,25 @@ func AddOrUpdateBook(bookInfo *entities.Book) (*entities.Book, error) {
 		}
 
 		if nil != foundValue { // 已经存在，更新现有记录
+			// 取出原始 ObjectId
+			book := entities.NewBookByInterface(foundValue)
+
+			// 待更新内容
 			result = bookInfo
+			result.ObjectId = book.ObjectId
 			result.UpdateTime = time.Now()
 
-			book := entities.NewBookByInterface(foundValue)
-			err = mongoDAL.UpdateId(colName, book.ObjectId, result)
+			err = mongoDAL.UpdateId(colName, result.ObjectId, result)
+
+			log.Printf("Update book which id=%s\n", result.ObjectId.Hex())
 		} else { // 不存在，新增记录
 			result = bookInfo
 			result.CreateTime = time.Now()
+			result.ObjectId = bson.NewObjectId()
 
 			err = mongoDAL.Insert(colName, result)
+
+			log.Printf("Insert book and generate id=%s\n", result.ObjectId.Hex())
 		}
 	}
 

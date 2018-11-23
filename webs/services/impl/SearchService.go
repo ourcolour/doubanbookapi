@@ -5,6 +5,7 @@ import (
 	"github.com/olivere/elastic"
 	"iamcc.cn/doubanbookapi/frameworks/entities/datasources"
 	"iamcc.cn/doubanbookapi/webs/entities"
+	"iamcc.cn/doubanbookapi/webs/entities/es"
 	"iamcc.cn/doubanbookapi/webs/services"
 	searchBL "iamcc.cn/doubanbookapi/webs/services/bll/search"
 )
@@ -41,9 +42,19 @@ func (this *SearchService) SyncBook() (int64, int64, error) {
 	if nil != err {
 		return delCount, addCount, err
 	}
-	bookList := ds.DataList.([]*entities.Book)
 
-	if nil == bookList || len(bookList) < 1 {
+	// 转换  Book -> ES_Book
+	bookList := ds.DataList.([]*entities.Book)
+	var esBookList []*es.ES_Book = make([]*es.ES_Book, 0)
+	for _, book := range bookList {
+		if nil == book {
+			continue
+		}
+		esBook := es.NewESBookByBook(book)
+		esBookList = append(esBookList, esBook)
+	}
+
+	if nil == esBookList || len(esBookList) < 1 {
 		return delCount, addCount, err
 	}
 
@@ -54,7 +65,7 @@ func (this *SearchService) SyncBook() (int64, int64, error) {
 	}
 
 	// 同步到es
-	addCount, err = searchBL.BatchAddBook(bookList)
+	addCount, err = searchBL.BatchAddBook(esBookList)
 
 	return delCount, addCount, err
 }

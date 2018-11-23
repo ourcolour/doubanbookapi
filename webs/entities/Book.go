@@ -29,7 +29,7 @@ type Tag struct {
 }
 
 type Book struct {
-	ObjectId bson.ObjectId `json:"id" bson:"_id"`
+	ObjectId bson.ObjectId `json:"_id" bson:"_id"`
 
 	Rating *Rating `json:"rating" bson:"rating"`
 
@@ -86,5 +86,6 @@ func NewBookByJson(jsonStr string) *Book {
 }
 
 func NewBookByInterface(itf interface{}) *Book {
-	return NewBookByJson(utils.MustToJsonString(itf))
+	jsonStr := utils.MustToJsonString(itf)
+	return NewBookByJson(jsonStr)
 }

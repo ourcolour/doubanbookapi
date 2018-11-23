@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/olivere/elastic"
 	"iamcc.cn/doubanbookapi/configs"
-	"iamcc.cn/useelk/constants/errs"
+	"iamcc.cn/doubanbookapi/frameworks/constants/errs"
 	"log"
 	"strings"
 )
