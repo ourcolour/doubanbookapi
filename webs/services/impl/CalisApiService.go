@@ -39,7 +39,16 @@ func (this *CalisApiService) GetCipByIsbn(isbn string) ([]string, error) {
 		return nil, err
 	}
 
-	return result, err
+	// 保存到本地
+	bookService := NewBookService()
+	bookInfo, err := bookService.GetBookByIsbn(isbn)
+	if nil != err {
+		return nil, err
+	}
+	bookInfo.Cips = result
+	bookInfo, err = bookService.AddOrUpdateBook(bookInfo)
+
+	return bookInfo.Cips, err
 }
 
 func (this *CalisApiService) UpdateLocalBookCip() (map[string][]string, error) {
@@ -52,8 +61,8 @@ func (this *CalisApiService) UpdateLocalBookCip() (map[string][]string, error) {
 
 	// 查找本地记录
 	criteriaMap := hashmap.New()
-	criteriaMap.Put("cipsExists", false)
-	//criteriaMap.Put("cipsHasElements", 0)
+	//criteriaMap.Put("cipsExists", true)
+	criteriaMap.Put("cipsHasElements", 0)
 	ds, err := bookService.GetBookListBy(criteriaMap)
 	if nil != err {
 		return nil, err
