@@ -43,7 +43,7 @@ Website listening on:
 If you want to change, just modify the file below: 
 
 ```
-<RPJ_ROOT>/configs/AppConfig.go
+<PRJ_ROOT>/configs/AppConfig.go
 ```
 
 ### DB Settings
@@ -51,7 +51,7 @@ If you want to change, just modify the file below:
 You can change MongoDB service here:
 
 ```$go
-<RPJ_ROOT>/configs/MongoDBConfig.go
+<PRJ_ROOT>/configs/MongoDBConfig.go
 ```
 
 ### ES Settings
@@ -59,7 +59,7 @@ You can change MongoDB service here:
 You can change ElasticSearch service here:
 
 ```$go
-<RPJ_ROOT>/configs/EsConfig.go
+<PRJ_ROOT>/configs/EsConfig.go
 ```
 
 ## How to use
